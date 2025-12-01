@@ -2,13 +2,13 @@ import express from 'express';
 import User from './models/User.js';
 import MessaggioPromozionale from './models/MessaggioPromozionale.js';
 import jwt from 'jsonwebtoken';
-//import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library';
 
 const router = express.Router(); //gli arrivano le richieste get, post...
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
-//const client = new OAuth2Client( GOOGLE_CLIENT_ID );
+const client = new OAuth2Client( GOOGLE_CLIENT_ID );
 
 async function verify( token ) {
 	const ticket = await client.verifyIdToken({
@@ -18,17 +18,6 @@ async function verify( token ) {
 	const payload = ticket.getPayload(); //oggetto di risposta
 	return payload;
 }
-router.get('/signup', async function (req, res){
-	const newMex = new MessaggioPromozionale({
-		mittente: "692d6bba0b536547ab59ab01",
-    tipo: "Promozione",
-    destinatario: "692d6bba0b536547ab59ab01",
-    titolo: "aaa",
-    testo: "text",
-    letto: false
-	})
-	newMex.save();
-})
 
 router.post('/login', async function (req, res) { //path (quindi titolo API),  request e response
 
