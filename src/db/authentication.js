@@ -2,13 +2,13 @@ import express from 'express';
 import User from './models/User.js';
 import MessaggioPromozionale from './models/MessaggioPromozionale.js';
 import jwt from 'jsonwebtoken';
-import { OAuth2Client } from 'google-auth-library';
+//import { OAuth2Client } from 'google-auth-library';
 
 const router = express.Router(); //gli arrivano le richieste get, post...
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+//const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
-const client = new OAuth2Client( GOOGLE_CLIENT_ID );
+//const client = new OAuth2Client( GOOGLE_CLIENT_ID );
 
 async function verify( token ) {
 	const ticket = await client.verifyIdToken({
