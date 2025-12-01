@@ -1,13 +1,14 @@
 import express from 'express';
-import User from '.models/User.js';
+import User from './models/User.js';
+import MessaggioPromozionale from './models/MessaggioPromozionale.js';
 import jwt from 'jsonwebtoken';
-import { OAuth2Client } from 'google-auth-library';
+//import { OAuth2Client } from 'google-auth-library';
 
-const router = express.Router(); //gli arrivano le richieste get post...
+const router = express.Router(); //gli arrivano le richieste get, post...
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID | "aaa";
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
-const client = new OAuth2Client( GOOGLE_CLIENT_ID );
+//const client = new OAuth2Client( GOOGLE_CLIENT_ID );
 
 async function verify( token ) {
 	const ticket = await client.verifyIdToken({
@@ -17,15 +18,26 @@ async function verify( token ) {
 	const payload = ticket.getPayload(); //oggetto di risposta
 	return payload;
 }
+router.get('/signup', async function (req, res){
+	const newMex = new MessaggioPromozionale({
+		mittente: "692d6bba0b536547ab59ab01",
+    tipo: "Promozione",
+    destinatario: "692d6bba0b536547ab59ab01",
+    titolo: "aaa",
+    testo: "text",
+    letto: false
+	})
+	newMex.save();
+})
 
-router.post('/auth/login', async function (req, res) { //path (quindi titolo API),  request e response
+router.post('/login', async function (req, res) { //path (quindi titolo API),  request e response
 
     var user = {};
-
+	console.log(req.body.username);
     user = await User.findOne(
         { username: req.body.username }
     ).exec(); //per eseguire la funzione
-
+	console.log(user);
 	if(!user) {
 		res.status(401).json({ success: false, message: "Authentication failed. User not found."});
 		return;
@@ -58,3 +70,4 @@ router.post('/auth/login', async function (req, res) { //path (quindi titolo API
 		self: "/ShopGreenAPI/1.0.0" + user._id
 	})
 }) 
+export default router;

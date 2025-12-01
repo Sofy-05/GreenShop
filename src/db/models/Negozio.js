@@ -27,7 +27,7 @@ const NegozioSchema = new Schema({
     maps: {type: String, required: false, trim: true}, //trim serve per togliere eventuali spazi lasciati erroneamente nell'inserimento del link
     mappe: {type: String, required: false, trim: true},
     licenza: {type : String, required: true},
-    verificato: {type: Boolean, default:false}
+    verificatoDaOperatore: {type: Boolean, default:false}
 })
 
 const Negozio = mongoose.model('Negozio', NegozioSchema);

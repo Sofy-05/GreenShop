@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 const { Schema, SchemaTypes } = mongoose;
 
-const userSchema = new Schema({
+export default mongoose.model("User", new Schema({
 
     username: {type : String, required: true, unique: true},
     email: {type : String, required: true, unique: true},
@@ -11,7 +11,8 @@ const userSchema = new Schema({
     }},
     ruolo: {type : String, enum : ["Operatore", "Utente", "Venditore"], required : true},
     profile_picture: {type : String, required: false, default: "images/avatar-default.svg"},
-    preferiti:{ type: [SchemaTypes.ObjectId], ref: 'Negozio'},
+    preferitiNegozi:{ type: [SchemaTypes.ObjectId], ref: 'Negozio'},
+    preferitiECommerce:{ type: [SchemaTypes.ObjectId], ref: 'Ecommerce'},
     impostazioni: {
         lingua: {type: String, enum: ["it", "en", "de"], default: "it" },
         tema: {type: String, enum: ["chiaro", "scuro"], default: "chiaro" },
@@ -20,8 +21,4 @@ const userSchema = new Schema({
     negozioAssociato: {type: SchemaTypes.ObjectId, ref: 'Negozio', required: function(){ 
         return (this.ruolo === 'Venditore')
     }}
-});
-
-const User = mongoose.model('User', userSchema);
-
-export default User;
+}));

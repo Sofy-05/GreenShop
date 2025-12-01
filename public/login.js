@@ -6,12 +6,13 @@ function handleSubmitLogin(e) {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    fetch('../db/authentication', {
+    fetch('http://localhost:3000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify( { username: username, password: password } ),
     })
-    .then((resp) => resp.json()) // Transform the data into json
+    .then(console.log)
+    /*.then((resp) => resp.json()) // Transform the data into json
     .then(function(data) { // Here you get the data to modify as you please
         //console.log(data);
         loggedUser.token = data.token;
@@ -23,7 +24,7 @@ function handleSubmitLogin(e) {
         document.getElementById("message").textContent = loggedUser.username;
         return;
     })
-    .catch( error => console.error(error) ); // If there is any error you will catch them here
+    .catch( error => console.error(error) );*/ // If there is any error you will catch them here
 }
 
 document.getElementById("loginForm").addEventListener("submit", handleSubmitLogin); //doc per prendere doc html, ho dato id al form per prenderlo qui 

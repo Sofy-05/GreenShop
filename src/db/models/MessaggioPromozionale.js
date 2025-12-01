@@ -11,6 +11,6 @@ const MessaggioSchema = new Schema({
     letto: {type: Boolean, default: false }
 })
 
-const Messaggio = mongoose.model('Messaggio', MessaggioSchema);
+const Messaggio = mongoose.model('Messaggioaaa', MessaggioSchema);
 
 export default Messaggio;
