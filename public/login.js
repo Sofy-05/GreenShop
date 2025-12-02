@@ -11,7 +11,17 @@ function handleSubmitLogin(e) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify( { username: username, password: password } ),
     })
-    .then(console.log)
+    //.then(console.log)
+
+    //Aggiunto al posto di .then(console.log)
+    .then(resp => resp.json())
+    .then(data => {
+        console.log("Risposta dal server:", data);
+        document.getElementById("message").textContent = data.message;
+    })
+    .catch(err => console.error(err));
+
+
     /*.then((resp) => resp.json()) // Transform the data into json
     .then(function(data) { // Here you get the data to modify as you please
         //console.log(data);

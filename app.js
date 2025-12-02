@@ -13,6 +13,9 @@ const PORT = 3000;
 // Middleware per leggere i JSON
 app.use(express.json());
 
+//Middleware per leggere gli HTML (Aggiunto)
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cors());
 // Serve i file statici dalla cartella 'public'
 app.use(express.static('public'));
@@ -21,7 +24,8 @@ app.use(express.static('public'));
 app.use('/api', authRouter);
 
 // Connessione DB
-mongoose.connect(process.env.DB_URI || 'mongodb://127.0.0.1:27017/ShopGreen')
+//mongoose.connect(process.env.DB_URI || 'mongodb://127.0.0.1:27017/ShopGreen')
+mongoose.connect(process.env.DB_URI || 'mongodb+srv://anna_luvisotto:Anna2005.@anna.pcl2dby.mongodb.net/?appName=Anna')
     .then(() => {
         console.log('--- MongoDB Connesso ---');
         app.listen(PORT, () => {
