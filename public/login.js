@@ -6,7 +6,7 @@ function handleSubmitLogin(e) {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    fetch('http://localhost:3000/api/login', {
+    fetch('http://localhost:3000/api/auth/login', { //cambiato il path da /login a /auth/login (coma da API)
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify( { username: username, password: password } ),

@@ -19,7 +19,7 @@ async function verify( token ) {
 	return payload;
 }
 
-router.post('/login', async function (req, res) { //path (quindi titolo API),  request e response
+router.post('/auth/login', async function (req, res) { //path (quindi titolo API),  request e response. Cambiato path da /login a /auth/login (come da API)
 
     var user = {};
 	console.log(req.body.username);

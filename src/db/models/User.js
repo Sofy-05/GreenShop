@@ -9,7 +9,7 @@ export default mongoose.model("User", new Schema({
     password: {type : String, required: function(){
         return !this.googleId;
     }},
-    ruolo: {type : String, enum : ["Operatore", "Utente", "Venditore"], required : true},
+    ruolo: {type : String, enum : ["operatore", "utente", "venditore"], required : true},
     profile_picture: {type : String, required: false, default: "images/avatar-default.svg"},
     preferitiNegozi:{ type: [SchemaTypes.ObjectId], ref: 'Negozio'},
     preferitiECommerce:{ type: [SchemaTypes.ObjectId], ref: 'Ecommerce'},
@@ -19,6 +19,6 @@ export default mongoose.model("User", new Schema({
         notificheMail: {type: Boolean, default: true}
     },
     negozioAssociato: {type: SchemaTypes.ObjectId, ref: 'Negozio', required: function(){ 
-        return (this.ruolo === 'Venditore')
+        return (this.ruolo === 'venditore')
     }}
 }));

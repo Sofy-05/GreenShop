@@ -12,12 +12,13 @@ const creaDati = async () => {
         // 2. Definisci gli utenti di test
         // Nota: metto la password in chiaro perché nel tuo codice di login 
         // la confronti direttamente (user.password != req.body.password)
+        await User.deleteMany({});
         const utentiTest = [
             {
-                username: "sofia",
-                email: "sofia@test.com",
-                password: "sofia", 
-                ruolo: "Utente"
+                username: "anna",
+                email: "anna@test.com",
+                password: "anna", 
+                ruolo: "operatore"
             }
         ];
 
