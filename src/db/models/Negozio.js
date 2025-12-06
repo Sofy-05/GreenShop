@@ -13,6 +13,7 @@ const OrariGiorno = new Schema({
 
 const NegozioSchema = new Schema({
     nome: {type : String, required: true},
+    coordinate: {type: [Number], required: true},
     categoria: { type: [String], enum: ["cura della casa e della persona", "alimenti", "vestiario"], required: true},
     orari: {
         lunedi: OrariGiorno,
@@ -26,8 +27,9 @@ const NegozioSchema = new Schema({
     linkSito: {type: String, required: false},
     maps: {type: String, required: false, trim: true}, //trim serve per togliere eventuali spazi lasciati erroneamente nell'inserimento del link
     mappe: {type: String, required: false, trim: true},
-    licenza: {type : String, required: true},
-    verificatoDaOperatore: {type: Boolean, default:false}
+    licenzaOppureFoto: {type : Buffer, required: true}, //Buffer si usa per pdf o jpeg
+    verificatoDaOperatore: {type: Boolean, default:false}, //è false se è un negozio segnalato da un utente che ha compilato (parzialmente) il form?
+    sostenibile: {type: Boolean, default:false}
 })
 
 const Negozio = mongoose.model('Negozio', NegozioSchema);
