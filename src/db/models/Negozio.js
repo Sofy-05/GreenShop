@@ -29,7 +29,7 @@ const NegozioSchema = new Schema({
     mappe: {type: String, required: false, trim: true},
     licenzaOppureFoto: {type : string, required: true}, 
     verificatoDaOperatore: {type: Boolean, default:false}, //è false se è un negozio segnalato da un utente che ha compilato (parzialmente) il form?
-    sostenibile: {type: Boolean, default:false},
+    sostenibilitàVerificata: {type: Boolean, default:false},
     proprietario: {type: SchemaTypes.ObjectId, ref: 'User', required: false}
 })
 
