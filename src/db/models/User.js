@@ -18,8 +18,7 @@ export default mongoose.model("User", new Schema({
         tema: {type: String, enum: ["chiaro", "scuro"], default: "chiaro" },
         notificheMail: {type: Boolean, default: true}
     },
-    /*negozioAssociato: {type: SchemaTypes.ObjectId, ref: 'Negozio', required: function(){ 
-        return (this.ruolo === 'venditore')
-    }} 
-    spostata la logica di associazione al negozio*/
+    isActive: { type: Boolean, default: false},
+    activationToken: {type: String, default: null}
+
 }));
