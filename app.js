@@ -3,6 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import authRouter from './src/db/authentication.js'; // Nota il percorso verso src
 import registerRouter from './src/db/register.js'; 
+//import feedbackRouter from ./src/db/feedback.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -23,7 +24,8 @@ app.use(express.static('public'));
 
 // Collegamento route: tutte le richieste che iniziano con /api vanno al tuo router
 app.use('/api', authRouter);
-app.use('/api',registerRouter);
+app.use('/api', registerRouter);
+//app.use('/api', feedbackRouter);
 //----------------------------- parte aggiunta per collegare il nuovo file html
 
 import path from 'path';
