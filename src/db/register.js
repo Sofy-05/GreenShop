@@ -5,9 +5,9 @@ import nodemailer from 'nodemailer';
 import 'dotenv/config';
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail', //uso gmail come provider
+    service: 'gmail', //usiamo gmail come provider
     auth: {
-        user: process.env.MAIL, //mia mail per "dire" a google di fidarsi di me
+        user: process.env.MAIL, //mia mail (laura) per mandare le mail ai vari utenti
         pass: process.env.PASSWORD_MAIL
     }
 })
@@ -97,9 +97,9 @@ router.post('/auth/register', async function (req, res){
     
     }catch(error){
         console.error(error);
-        res.status(500).json({ //errore generico 
+        res.status(500).json({ 
             success: false, 
-            message: "Errore generico del server" 
+            message: "Errore del server" 
         });
     }
 
