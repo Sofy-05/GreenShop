@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken';
 
 const tokenChecker = function(req, res, next) {
-	var token = req.headers['Autenticazione'];
+	var token = req.headers['autenticazione'];
 
 	if (!token) {
 		return res.status(401).send({ 
 			success: false,
             titolo: "Utente non autenticato",
-			dettagli: err.message
+			dettagli: "Il token non è valido, è scaduto o non è possibile controllarne l'autenticità"
 		});
 	}
 
@@ -15,8 +15,8 @@ const tokenChecker = function(req, res, next) {
 		if (err) {
 			return res.status(403).send({
 				success: false,
-				titolo: "Impossibile autenticare il token",
-                dettagli: err.message
+				titolo: "Permessi negati",
+                dettagli: "Il token non fornisce i permessi richiesti"
 			});		
 		} else {
 			req.loggedUser = decoded;
