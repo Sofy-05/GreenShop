@@ -11,7 +11,7 @@ router.get('', async (req, res) => {
         //const userId = req.loggedUser.id;
         const filtro = {};
         const userId = req.query.user;
-        const negozioId = req.query.negozio
+        const negozioId = req.body.negozio;
 
         if (negozioId)
         {
@@ -28,7 +28,6 @@ router.get('', async (req, res) => {
             });
         }
 
-        
         res.status(200).json({successo: true, feedback: feedbackTrovato}); // restituisco un messaggio di conferma e la lista degli user trovati (deve essere uno user perché cercato per id)
     }
     catch (err)
@@ -44,12 +43,12 @@ router.post('', async (req, res) => {
         const idUtente = req.query.user; // ID dell'utente (chi sta salvando il preferito)
         const idNegozio = req.body.idNegozio; // ID del negozio preso dal corpo della POST
 
-        //controllo che nonn esista già un feedback
+        //controllo che non esista già un feedback per questo user a questo negozio
         const filtro = {};
         filtro.autore = idUtente;
         filtro.negozio = idNegozio;
         const feedbackTrovato = await Feedback.find(filtro)
-        if (feedbackTrovato.length > 0) {
+        if (feedbackTrovato || feedbackTrovato.length > 0) {
             return res.status(409).json({
                 success: true,
                 titolo: "Feedback già presente",
