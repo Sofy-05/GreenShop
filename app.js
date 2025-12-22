@@ -32,9 +32,9 @@ app.use('/api/negozi', negoziRouter);
 app.use('/api/preferiti', preferitiRouter);
 app.use('/api/feedback', feedbackRouter);
 
-// Per risolvere il problema di __dirname in moduli ES (necessario per res.sendFile)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// SE NO USIAMO LE 2 CONST SOTTOSTANTI ELIMINIAMOLE, VEDIAMO MA PER ORA NON SERVONO
+const __filename = fileURLToPath(import.meta.url); // percorso completo del file corrente
+const __dirname = path.dirname(__filename); // percorso della cartella del file
 
 // Connessione DB
 //mongoose.connect(process.env.DB_URI || 'mongodb://127.0.0.1:27017/ShopGreen')
