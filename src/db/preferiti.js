@@ -71,3 +71,5 @@ router.delete('', async (req, res) => {
         res.status(500).json({success: false, titolo: "Internal Server Error", dettagli: "Il server fallisce nello stabilire una connessione con il database"})
     } 
 });
+
+export default router;

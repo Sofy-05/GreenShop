@@ -7,44 +7,34 @@ import preferitiRouter from './src/db/preferiti.js';
 import feedbackRouter from './src/db/feedback.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-// Middleware per leggere i JSON
+// Permettono di leggere il body delle richieste
 app.use(express.json());
-
-//Middleware per leggere gli HTML (Aggiunto)
 app.use(express.urlencoded({ extended: true }));
 
+//CORS: Permette al frontend(port 3001) di parlare con il backend
 app.use(cors());
+
 // Serve i file statici dalla cartella 'public'
 app.use(express.static('public'));
 
 // Collegamento route: tutte le richieste che iniziano con /api vanno al tuo router
-app.use('/api/auth', authRouter);
+app.use('/api/auth/login', authRouter);
 app.use('/api/register',registerRouter);
 app.use('/api/negozi', negoziRouter);
 app.use('/api/preferiti', preferitiRouter);
 app.use('/api/feedback', feedbackRouter);
-//----------------------------- parte aggiunta per collegare il nuovo file html
-
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 // Per risolvere il problema di __dirname in moduli ES (necessario per res.sendFile)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Route per la radice /
-app.get('/', (req, res) => {
-    // Invia il file HTML che si trova nella cartella 'public'
-    res.sendFile(path.join(__dirname, 'public', 'loginCredenzialiGoogle.html'));
-});
-
-//-----------------------------
 
 // Connessione DB
 //mongoose.connect(process.env.DB_URI || 'mongodb://127.0.0.1:27017/ShopGreen')

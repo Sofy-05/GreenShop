@@ -9,7 +9,8 @@ const FeedbackSchema = new Schema({
 
 });
 
-Feedback.createIndex({"autore": 1, "negozio": 1}, {unique: true});
+FeedbackSchema.index({ autore: 1, negozio: 1 }, { unique: true });
+//Feedback.createIndex({"autore": 1, "negozio": 1}, {unique: true});
 const Feedback = mongoose.model('Feedback', FeedbackSchema);
 
 export default Feedback;

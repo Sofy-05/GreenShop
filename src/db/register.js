@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 const router = express.Router(); 
 
 
-router.post('/auth/register', async function (req, res){
+router.post('', async function (req, res){
     try{
         const {username, password, email, ruolo} = req.body;
         if(!username || !password || !email){
