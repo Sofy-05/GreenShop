@@ -29,7 +29,7 @@ app.use(express.static('public'));
 app.use('/api/auth/login', authRouter);
 app.use('/api/register',registerRouter);
 app.use('/api/negozi', negoziRouter);
-app.use('/api/preferiti', preferitiRouter);
+app.use('/api/preferiti/users', preferitiRouter);
 app.use('/api/feedback', feedbackRouter);
 
 // Per risolvere il problema di __dirname in moduli ES (necessario per res.sendFile)
