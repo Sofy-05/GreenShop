@@ -3,6 +3,9 @@ import Negozio from './models/Negozio.js';
 import tokenChecker from './tokenChecker.js';
 const router = express.Router();
 
+//req.query per query params
+//req.params.nomedelparam per path params
+
 router.get('', async (req, res) => {
     const filtro = {}
     const filtroNome = req.query.nome //filtro per nome (req.query si usa per i query parameters)
@@ -19,6 +22,17 @@ router.get('', async (req, res) => {
 
     res.status(200).json(negoziTrovati);
 });
+
+router.get('/:id', async(req, res) => {
+    const id = req.params.id
+    const negozioInfo = await Negozio.findById(id)
+    if(!negozioInfo){
+        
+    }
+});
+
+
+
 
 //router.post('', tokenChecker, async (req,res) => {
 router.post('', async (req,res) => {    
@@ -73,5 +87,7 @@ router.post('', async (req,res) => {
     }
     
 });
+
+
 
 export default router;
