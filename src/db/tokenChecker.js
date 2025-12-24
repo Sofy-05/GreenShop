@@ -1,3 +1,5 @@
+//Per DELETE, POST e PUT, dov'è necessario essere loggati per eseguire un'operazione
+
 import jwt from 'jsonwebtoken';
 
 const tokenChecker = function(req, res, next) {

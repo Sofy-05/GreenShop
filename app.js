@@ -29,7 +29,7 @@ app.use(express.static('public'));
 app.use('/api/auth/login', authRouter);
 app.use('/api/register',registerRouter);
 app.use('/api/negozi', negoziRouter);
-app.use('/api/preferiti', preferitiRouter);
+app.use('/api/preferiti/users', preferitiRouter);
 app.use('/api/feedback', feedbackRouter);
 
 // SE NO USIAMO LE 2 CONST SOTTOSTANTI ELIMINIAMOLE, VEDIAMO MA PER ORA NON SERVONO

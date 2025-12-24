@@ -1,28 +1,83 @@
 import express from 'express';
 import Negozio from './models/Negozio.js'; 
 import tokenChecker from './tokenChecker.js';
+import tokenCheckerOptional from './tokenCheckerOptional.js';
 const router = express.Router();
 
-router.get('', async (req, res) => {
-    const filtro = {}
-    const filtroNome = req.query.nome //filtro per nome (req.query si usa per i query parameters)
-    const filtroCategoria = req.query.categoria //filtro per categoria
-    const filtroVerificato = req.query.verificatoDaOperatore //filtro per mappa o sezione segnalazioni
-    if(filtroNome)
-        filtro.nome = new RegExp(filtroNome, 'i');
-    if(filtroCategoria)
-        filtro.categoria = filtroCategoria
-    if(filtroVerificato)
-        filtro.verificatoDaOperatore = filtroVerificato
-    
-    const negoziTrovati = await Negozio.find(filtro);
+//req.query per query params
+//req.params.nomedelparam per path params
 
-    res.status(200).json(negoziTrovati);
+router.get('', async (req, res) => { //testata, funziona
+    try{
+        const filtro = {}
+        const filtroNome = req.query.nome //filtro per nome (req.query si usa per i query parameters)
+        const filtroCategoria = req.query.categoria //filtro per categoria
+        const filtroVerificato = req.query.verificatoDaOperatore //filtro per mappa o sezione segnalazioni
+        if(filtroNome)
+            filtro.nome = new RegExp(filtroNome, 'i');
+        if(filtroCategoria)
+            filtro.categoria = filtroCategoria
+        if(filtroVerificato)
+            filtro.verificatoDaOperatore = filtroVerificato
+        
+        const negoziTrovati = await Negozio.find(filtro);
+
+        res.status(200).json(negoziTrovati);
+    }
+    catch(err){
+        console.error("Errore nella visualizzione di un negozio: ", err);
+        res.status(500).json({
+            success: false,
+            titolo: "Internal Server Error",
+            dettagli: "Il server fallisce nello stabilire una connessione con il database"
+        })
+    }
 });
 
-//router.post('', tokenChecker, async (req,res) => {
-router.post('', async (req,res) => {    
+router.get('/:id', tokenCheckerOptional, async(req, res) => { //testata, funziona
+    try{
+        const id = req.params.id
+        const negozio = await Negozio.findById(id).lean() //.lean() serve per rimuovere alcuni campi dal body di risposta
+
+        if(!negozio){
+            res.status(404).json({
+                success: false,
+                titolo: "Not Found",
+                dettagli: "Negozio non trovato"
+            })
+        }
+
+        let isOperatore = false;
+        let isVenditore = false;
+
+        if(req.loggedUser) {
+            isOperatore = req.loggedUser.ruolo === 'operatore';
+            isVenditore = negozio.proprietario && (negozio.proprietario.toString() === req.loggedUser.id); //controllo se l'utente è proprietario di tale negozio
+        }
+        if (!isOperatore && !isVenditore) {
+            delete negozio.licenzaOppureFoto;
+            delete negozio.verificatoDaOperatore;
+        }
+        if(!isOperatore && isVenditore)
+            delete negozio.verificatoDaOperatore
+
+        res.status(200).json(negozio);
+        //Il frontend userà req.loggedUser (o il token) per decidere se mostrare il pulsante "Aggiungi ai preferiti"
+    }
+    catch (err) {
+        console.error("Errore nella visualizzazione dei dettagli di un negozio o segnalazione: ", err);
+        res.status(500).json({
+            success: false,
+            titolo: "Internal Server Error",
+            dettagli: "Il server fallisce nello stabilire una connessione con il database"
+        })
+    }
+
+});
+
+router.post('', tokenChecker, async (req,res) => { //testata, funziona
     try{ //gestione del successo
+        
         let negozio = new Negozio({
             //campi obbligatori
             nome: req.body.nome,
@@ -40,8 +95,7 @@ router.post('', async (req,res) => {
             orari: req.body.orari,
             coordinate: req.body.coordinate,
             
-            //proprietario: req.loggedUser.id || null
-            proprietario: null
+            proprietario: req.body.proprietario ? req.loggedUser.id : null
 
         });
         
@@ -49,29 +103,72 @@ router.post('', async (req,res) => {
         
         let negozioId = negozio._id;
 
-        console.log('Negozio creato con successo');
-
-        res.location("/api/negozi" + negozioId).status(201).send();
+        res.location("/api/negozi/" + negozioId)  
+            .status(201)                            
+            .json({                                
+                success: true
+            });
     }
     catch(err){ //gestione errori definiti nelle API
         console.error("Errore nella creazione del negozio: ", err);
-
         if(err.name == "Bad Request"){
             res.status(400).json({ 
                 success: false, 
-                titolo: "Uno o più campi obbligatori mancanti", 
-                dettagli: err.message 
+                titolo: "Bad Request", 
+                dettagli: "Uno o più campi obbligatori mancanti"
             });
         }
         else if(err.name == "Internal Server Error"){
             res.status(500).json({ 
                 success: false, 
-                titolo: "Connessione con il database fallita", 
-                dettagli: err.message 
+                titolo: "Internal Server Error", 
+                dettagli: "Il server fallisce nello stabilire una connessione con il database"
             });
         }
     }
-    
 });
+
+router.delete('/:id', tokenChecker, async(req, res) => { //testata, funziona
+    try{
+        const id = req.params.id
+        const negozio = await Negozio.findById(id)
+
+        if(!negozio){
+            res.status(404).json({
+                success: false,
+                titolo: "Not Found",
+                dettagli: "Negozio non trovato"
+            })
+        }
+
+        let isOperatore = req.loggedUser.ruolo === 'operatore';
+        let isVenditore = negozio.proprietario && (negozio.proprietario.toString() === req.loggedUser.id);
+
+        if(!isOperatore && !isVenditore){ //Ha una funzione diversa rispetto al 403 del tokenChecker
+            return res.status(403).json({
+                    success: false, 
+                    titolo: "Unauthorized",
+                    dettagli: "Questo account non ha i permessi per procedere con l'operazione"
+            });
+        }
+
+        await Negozio.deleteOne({ _id: id });
+
+        console.log("Negozio eliminato con successo")
+        res.status(200).json({
+                success: true
+        });
+    }
+    catch (err){
+        console.error("Errore cancellazione negozio: ", err);
+        res.status(500).json({
+            success: false,
+            titolo: "Internal Server Error",
+            dettagli: "Il server fallisce nello stabilire una connessione con il database"
+        });
+
+    }
+});
+
 
 export default router;
