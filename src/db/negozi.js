@@ -77,6 +77,7 @@ router.get('/:id', tokenCheckerOptional, async(req, res) => { //testata, funzion
 
 router.post('', tokenChecker, async (req,res) => { //testata, funziona
     try{ //gestione del successo
+        
         let negozio = new Negozio({
             //campi obbligatori
             nome: req.body.nome,
@@ -94,7 +95,7 @@ router.post('', tokenChecker, async (req,res) => { //testata, funziona
             orari: req.body.orari,
             coordinate: req.body.coordinate,
             
-            proprietario: req.loggedUser.id || null
+            proprietario: req.body.proprietario ? req.loggedUser.id : null
 
         });
         
@@ -102,7 +103,7 @@ router.post('', tokenChecker, async (req,res) => { //testata, funziona
         
         let negozioId = negozio._id;
 
-        res.location("/api/negozi" + negozioId)  
+        res.location("/api/negozi/" + negozioId)  
             .status(201)                            
             .json({                                
                 success: true
