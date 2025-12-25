@@ -25,7 +25,7 @@ router.get('', async (req, res) => { //testata, funziona
         res.status(200).json(negoziTrovati);
     }
     catch(err){
-        console.error("Errore nella visualizzione di un negozio: ", err);
+        console.error("Errore nella visualizzazione dei negozi: ", err);
         res.status(500).json({
             success: false,
             titolo: "Internal Server Error",
@@ -34,9 +34,9 @@ router.get('', async (req, res) => { //testata, funziona
     }
 });
 
-router.get('/:id', tokenCheckerOptional, async(req, res) => { //testata, funziona
+router.get('/:negozio_id', tokenCheckerOptional, async(req, res) => { //testata, funziona
     try{
-        const id = req.params.id
+        const id = req.params.negozio_id
         const negozio = await Negozio.findById(id).lean() //.lean() serve per rimuovere alcuni campi dal body di risposta
 
         if(!negozio){
@@ -128,9 +128,9 @@ router.post('', tokenChecker, async (req,res) => { //testata, funziona
     }
 });
 
-router.delete('/:id', tokenChecker, async(req, res) => { //testata, funziona
+router.delete('/:negozio_id', tokenChecker, async(req, res) => { //testata, funziona
     try{
-        const id = req.params.id
+        const id = req.params.negozio_id
         const negozio = await Negozio.findById(id)
 
         if(!negozio){
@@ -170,5 +170,65 @@ router.delete('/:id', tokenChecker, async(req, res) => { //testata, funziona
     }
 });
 
+router.put('/:negozio_id', tokenChecker, async(req, res) => { //testata, funziona
+    try{
+        const negozioId = req.params.negozio_id;
+        
+        if(req.loggedUser.ruolo != 'operatore'){
+            return res.status(403).json({
+                success: false,
+                titolo: "Forbidden",
+                dettagli: "Questa operazione è accessibile ai soli operatori"
+            });
+        }
+
+        const negozioModificato = await Negozio.findByIdAndUpdate(
+            negozioId, 
+            {
+                nome: req.body.nome,
+                coordinate: req.body.coordinate,
+                categoria: req.body.categoria,
+                sostenibilitàVerificata: req.body.sostenibilitàVerificata,
+                maps: req.body.maps,
+                mappe: req.body.mappe,
+                linkSito: req.body.linkSito,
+                orari: req.body.orari,
+                licenzaOppureFoto: req.body.licenzaOppureFoto,
+                verificatoDaOperatore: true,
+                proprietario: req.body.proprietario
+            },
+            {new: true, runValidators: true}
+            //runValidators serve a forzare Mongoose a controllare se i campi obbligatori sono stati correttamente riempiti
+        )
+
+        if(!negozioModificato){
+            return res.status(404).json({
+                success: false,
+                titolo: "Not Found",
+                dettagli: "Il negozio da modificare non esiste"
+            });
+        }
+
+        res.status(200).json(negozioModificato);
+
+    }
+    catch (err){
+        console.error("Errore modifica negozio: ", err);
+        if(err.name == 'ValidationError'){
+                res.status(400).json({
+                success: false,
+                titolo: "Bad Request",
+                dettagli: "Campi non validi o mancanti"
+            });
+        }
+        else{
+            res.status(500).json({
+                success: false,
+                titolo: "Internal Server Error",
+                dettagli: "Il server fallisce nello stabilire una connessione con il database"
+            });
+        }
+    }
+});
 
 export default router;

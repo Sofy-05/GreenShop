@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import User from './src/db/models/User.js'; // Controlla che il percorso sia giusto!
+import Ecommerce from './src/db/models/Ecommerce.js';
 
 // 1. Connessione al DB
 //mongoose.connect('mongodb://127.0.0.1:27017/ShopGreen') 
@@ -9,7 +10,7 @@ mongoose.connect('mongodb+srv://anna_luvisotto:Anna2005.@anna.pcl2dby.mongodb.ne
 
 const creaDati = async () => {
     try {
-        // 2. Definisci gli utenti di test
+        // 2. Definisco gli utenti di test
         // Nota: metto la password in chiaro perché nel tuo codice di login 
         // la confronti direttamente (user.password != req.body.password)
         await User.deleteMany({});
@@ -19,12 +20,36 @@ const creaDati = async () => {
                 email: "anna@test.com",
                 password: "anna", 
                 ruolo: "operatore"
+            },
+            {
+                username: "sofia",
+                email: "sofia@test.com",
+                password: "sofia",
+                ruolo: "utente"
             }
         ];
 
-        // 3. Inserisci nel DB
+        // 3. Inserisco nel DB
         await User.insertMany(utentiTest);
-        console.log("Utenti creati con successo!");
+        console.log("Utenti Anna e Sofia creati con successo!");
+
+        //4. Recupero Sofia perchè mi serve per il profilo e-commerce
+        const userSofia = await User.findOne({ username: "sofia" });
+        if (!userSofia) {
+            throw new Error("Errore: Sofia non è stata salvata correttamente!");
+        }
+        
+        //5. Creo il profilo e-commerce per Sofia
+        const shopSofia = new Ecommerce({
+            User: userSofia._id,
+            Categorie: ["vestiario"], 
+            Zone: ["Gardolo", "Povo"], 
+            Links: ["https://sofia.com"],
+            Info: "Vendo i miei vestiti che non indosso più"
+        });
+
+        await shopSofia.save();
+        console.log("E-Commerce di Sofia creato e collegato con successo!");
 
     } catch (error) {
         console.error("Errore durante la creazione:", error.message);
