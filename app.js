@@ -5,6 +5,7 @@ import registerRouter from './src/db/register.js';
 import negoziRouter from './src/db/negozi.js';
 import preferitiRouter from './src/db/preferiti.js';
 import feedbackRouter from './src/db/feedback.js';
+import eshopsRouter from './src/db/eshops.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
@@ -31,6 +32,7 @@ app.use('/api/register',registerRouter);
 app.use('/api/negozi', negoziRouter);
 app.use('/api/preferiti/users', preferitiRouter);
 app.use('/api/feedback', feedbackRouter);
+app.use('/api/eshops', eshopsRouter);
 
 // SE NO USIAMO LE 2 CONST SOTTOSTANTI ELIMINIAMOLE, VEDIAMO MA PER ORA NON SERVONO
 const __filename = fileURLToPath(import.meta.url); // percorso completo del file corrente
