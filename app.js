@@ -10,11 +10,14 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
+
+app.use(cors());
 
 // Permettono di leggere il body delle richieste
 app.use(express.json());
