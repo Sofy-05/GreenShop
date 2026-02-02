@@ -16,6 +16,7 @@ const router = express.Router();
 
 router.post('', async function (req, res){
     try{
+        console.log(req)
         const {username, password, email, ruolo} = req.body;
         if(!username || !password || !email){
             return res.status(400).json({success: false, message: "campi obbligatori mancanti"});
