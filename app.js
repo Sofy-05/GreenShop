@@ -27,8 +27,8 @@ app.use(cors());
 app.use(express.static('public'));
 
 // Collegamento route: tutte le richieste che iniziano con /api vanno al tuo router
-app.use('/api/auth/login', authRouter);
-app.use('/api/auth/register',registerRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/auth', registerRouter);
 app.use('/api/negozi', negoziRouter);
 app.use('/api/preferiti/users', preferitiRouter);
 app.use('/api/feedback', feedbackRouter);

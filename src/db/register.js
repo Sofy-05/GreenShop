@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 const router = express.Router(); 
 
 
-router.post('', async function (req, res){
+router.post('/register', async function (req, res){
     try{
         console.log(req)
         const {username, password, email, ruolo} = req.body;
@@ -108,39 +108,29 @@ router.post('', async function (req, res){
 });
  
 //quando l'utente clicckerà il link verra fatta questa chiamata:
-router.get('/auth/confirm/:token', async function (req, res) { //:token dice che il token (che varia da utente a utente) verra messo sulla variabile token
-    try{
+router.get('/confirm/:token', async function (req, res) {
+    try {
         const tokenRicevuto = req.params.token;
-        const user = await User.findOne({ //cerco nel db l'utente con questo token
+
+        const user = await User.findOne({
             activationToken: tokenRicevuto
         });
 
-        if (!user) { // Se il token non è valido 
-        
-        return res.status(400).json({
-            success: false, 
-            message: "Link di attivazione non valido o già utilizzato"
-        });
+        if (!user) {
+            return res.redirect('http://localhost:3001/login#/login');
         }
 
         user.isActive = true;
-        user.activationToken = null; //tolgo il token (cosi lo uso 1 sola volta)
-
+        user.activationToken = null;
         await user.save();
-        
-        res.send(`
-            <div style="text-align: center; margin-top: 50px; font-family: Arial;">
-                <h1 style="color: green;">Account Attivato!</h1>
-                <p>Grazie ${user.username}, la tua email è stata verificata.</p>
-                <p>Ora puoi tornare all'app e effettuare il login.</p>
-            </div>
-        `);
-        
-    }catch(error){
+        return res.redirect('http://localhost:3001/login#/login');
+
+    } catch (error) {
         console.error("Errore attivazione:", error);
-        res.status(500).send("Si è verificato un errore interno.");
+        return res.redirect('http://localhost:3001/login#/login');
     }
 });
+
 
 
 export default router;

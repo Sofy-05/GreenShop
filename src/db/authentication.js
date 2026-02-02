@@ -18,7 +18,7 @@ async function verify( token ) {
 	return payload;
 }
 
-router.post('', async function (req, res) {
+router.post('/login', async function (req, res) {
     try {
         let user = null; // Usiamo let invece di var ed iniziamo a null
 
