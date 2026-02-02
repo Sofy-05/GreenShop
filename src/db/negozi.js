@@ -95,7 +95,8 @@ router.post('', tokenChecker, async (req,res) => { //testata, funziona
             orari: req.body.orari,
             coordinate: req.body.coordinate,
             
-            proprietario: req.body.proprietario ? req.loggedUser.id : null
+            proprietario: req.body.proprietario ? req.loggedUser.id : null 
+            //se il campo "proprietario" è a true, allora nel campo "proprietario" del negozio verrà inserito l'id dell'utente, altrimenti null
 
         });
         
