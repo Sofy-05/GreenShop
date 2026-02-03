@@ -14,7 +14,7 @@ const OrariGiorno = new Schema({
 const NegozioSchema = new Schema({
     nome: {type : String, required: true},
     coordinate: {type: [Number], required: true},
-    categoria: { type: [String], enum: ["cura della casa e della persona", "alimenti", "vestiario"], required: true},
+    categoria: { type: [String], enum: ["cura della casa e della persona", "alimenti", "vestiario", "altro"], required: true},
     orari: {
         lunedi: OrariGiorno,
         martedi: OrariGiorno,
