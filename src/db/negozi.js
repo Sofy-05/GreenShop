@@ -90,11 +90,18 @@ router.get('/:negozio_id', tokenCheckerOptional, async(req, res) => { //testata,
 router.post('', tokenChecker, async (req,res) => { //testata, funziona
     try{ //gestione del successo
         
+        let categorieInput = req.body.categoria || req.body.categories;
+        
+        // Se è una stringa singola (es. "alimenti"), la trasformiamo in array
+        if (typeof categorieInput === 'string') {
+            categorieInput = [categorieInput];
+        }
+
         let negozio = new Negozio({
             //campi obbligatori
             nome: req.body.nome,
             licenzaOppureFoto: req.body.licenzaOppureFoto,
-            categoria: req.body.categoria,
+            categoria: categorieInput,
             
             //campi impostati di default
             sostenibilitàVerificata: false,
@@ -228,7 +235,13 @@ router.put('/:negozio_id', tokenChecker, async (req, res) => {
                     await user.save();
                     console.log(`Utente ${user.username} promosso a venditore.`);
                 }
-            } else {
+            } 
+            else if (req.body.proprietarioInAttesa === null) {
+                datiDaAggiornare.proprietarioInAttesa = null;
+                // Non tocchiamo nient'altro, il negozio resta vivo
+            }
+            
+            else {
                 if (req.body.verificatoDaOperatore !== undefined) {
                     datiDaAggiornare.verificatoDaOperatore = req.body.verificatoDaOperatore;
                 }
