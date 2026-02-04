@@ -1,5 +1,6 @@
 import express from 'express';
 import Negozio from './models/Negozio.js'; 
+import User from './models/User.js';
 import tokenChecker from './tokenChecker.js';
 import tokenCheckerOptional from './tokenCheckerOptional.js';
 const router = express.Router();
@@ -17,8 +18,19 @@ router.get('', async (req, res) => { //testata, funziona
             filtro.nome = new RegExp(filtroNome, 'i');
         if(filtroCategoria)
             filtro.categoria = filtroCategoria
-        if(filtroVerificato)
-            filtro.verificatoDaOperatore = filtroVerificato
+        if (filtroVerificato) {
+            if (filtroVerificato === 'false') {
+                // Se l'operatore cerca le "Notifiche" (cose da verificare),
+                // gli diamo sia i negozi nuovi (false) SIA quelli con richieste in attesa.
+                filtro.$or = [
+                    { verificatoDaOperatore: false },
+                    { proprietarioInAttesa: { $ne: null } } // $ne significa "Not Equal" (diverso da null)
+                ];
+            } else {
+                // Se cerca quelli verificati (true), comportamento standard
+                filtro.verificatoDaOperatore = filtroVerificato;
+            }
+        }
         
         const negoziTrovati = await Negozio.find(filtro);
 
@@ -95,9 +107,8 @@ router.post('', tokenChecker, async (req,res) => { //testata, funziona
             orari: req.body.orari,
             coordinate: req.body.coordinate,
             
-            proprietario: req.body.proprietario ? req.loggedUser.id : null 
-            //se il campo "proprietario" è a true, allora nel campo "proprietario" del negozio verrà inserito l'id dell'utente, altrimenti null
-
+            proprietario: null, //questo campo viene eventualmente riempito solo quando l'operatore approva la richiesta
+            proprietarioInAttesa: req.body.proprietario ? req.loggedUser.id : null
         });
         
         negozio = await negozio.save();
@@ -171,62 +182,84 @@ router.delete('/:negozio_id', tokenChecker, async(req, res) => { //testata, funz
     }
 });
 
-router.put('/:negozio_id', tokenChecker, async(req, res) => { //testata, funziona
-    try{
+router.put('/:negozio_id', tokenChecker, async (req, res) => {
+    try {
         const negozioId = req.params.negozio_id;
-        
-        if(req.loggedUser.ruolo != 'operatore'){
+        const negozioEsistente = await Negozio.findById(negozioId);
+
+        if (!negozioEsistente) {
+            return res.status(404).json({ success: false, dettagli: "Negozio non trovato" });
+        }
+
+        const isOperatore = req.loggedUser.ruolo === 'operatore';
+        const isProprietario = negozioEsistente.proprietario && 
+                               negozioEsistente.proprietario.toString() === req.loggedUser.id;
+
+        const isRivendicazione = !negozioEsistente.proprietario && 
+                                 req.body.proprietario === req.loggedUser.id;
+
+        if (!isOperatore && !isProprietario && !isRivendicazione) {
             return res.status(403).json({
                 success: false,
-                titolo: "Forbidden",
-                dettagli: "Questa operazione è accessibile ai soli operatori"
+                dettagli: "Non hai i permessi per modificare questa attività"
             });
+        }
+
+        let datiDaAggiornare = {
+            nome: req.body.nome,
+            categoria: req.body.categoria,
+            linkSito: req.body.linkSito,
+            orari: req.body.orari,
+            licenzaOppureFoto: req.body.licenzaOppureFoto,
+            descrizione: req.body.descrizione,
+            maps: req.body.maps,
+            mappe: req.body.mappe,
+        };
+        
+        if (isOperatore) {
+            if (req.body.proprietario) {
+                datiDaAggiornare.proprietario = req.body.proprietario; 
+                datiDaAggiornare.proprietarioInAttesa = null;
+                datiDaAggiornare.verificatoDaOperatore = true; 
+                
+                const user = await User.findById(req.body.proprietario);
+                if (user && user.ruolo === 'utente') {
+                    user.ruolo = 'venditore';
+                    await user.save();
+                    console.log(`Utente ${user.username} promosso a venditore.`);
+                }
+            } else {
+                if (req.body.verificatoDaOperatore !== undefined) {
+                    datiDaAggiornare.verificatoDaOperatore = req.body.verificatoDaOperatore;
+                }
+            }
+        } else if (isRivendicazione) {
+            datiDaAggiornare.proprietarioInAttesa = req.loggedUser.id; 
+            delete datiDaAggiornare.proprietario; 
+            delete datiDaAggiornare.verificatoDaOperatore;
         }
 
         const negozioModificato = await Negozio.findByIdAndUpdate(
-            negozioId, 
-            {
-                nome: req.body.nome,
-                coordinate: req.body.coordinate,
-                categoria: req.body.categoria,
-                sostenibilitàVerificata: req.body.sostenibilitàVerificata,
-                maps: req.body.maps,
-                mappe: req.body.mappe,
-                linkSito: req.body.linkSito,
-                orari: req.body.orari,
-                licenzaOppureFoto: req.body.licenzaOppureFoto,
-                verificatoDaOperatore: true,
-                proprietario: req.body.proprietario
-            },
-            {new: true, runValidators: true}
-            //runValidators serve a forzare Mongoose a controllare se i campi obbligatori sono stati correttamente riempiti
-        )
-
-        if(!negozioModificato){
-            return res.status(404).json({
-                success: false,
-                titolo: "Not Found",
-                dettagli: "Il negozio da modificare non esiste"
-            });
-        }
+            negozioId,
+            datiDaAggiornare,
+            { new: true, runValidators: true }
+        );
 
         res.status(200).json(negozioModificato);
 
-    }
-    catch (err){
+    } catch (err) {
         console.error("Errore modifica negozio: ", err);
-        if(err.name == 'ValidationError'){
-                res.status(400).json({
+        if (err.name == 'ValidationError') {
+            res.status(400).json({
                 success: false,
                 titolo: "Bad Request",
                 dettagli: "Campi non validi o mancanti"
             });
-        }
-        else{
+        } else {
             res.status(500).json({
                 success: false,
                 titolo: "Internal Server Error",
-                dettagli: "Il server fallisce nello stabilire una connessione con il database"
+                dettagli: "Errore del server durante l'aggiornamento"
             });
         }
     }

@@ -30,7 +30,8 @@ const NegozioSchema = new Schema({
     licenzaOppureFoto: {type : String, required: true}, 
     verificatoDaOperatore: {type: Boolean, default:false}, //è false se è un negozio segnalato da un utente che ha compilato (parzialmente) il form?
     sostenibilitàVerificata: {type: Boolean, default:false},
-    proprietario: {type: SchemaTypes.ObjectId, ref: 'User', required: false}
+    proprietario: {type: SchemaTypes.ObjectId, ref: 'User', required: false},
+    proprietarioInAttesa: {type: SchemaTypes.ObjectId, ref: 'User', default: null}
 })
 
 const Negozio = mongoose.model('Negozio', NegozioSchema);
