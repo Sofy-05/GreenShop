@@ -220,8 +220,12 @@ router.put('/:negozio_id', tokenChecker, async (req, res) => {
             licenzaOppureFoto: req.body.licenzaOppureFoto,
             descrizione: req.body.descrizione,
             maps: req.body.maps,
-            mappe: req.body.mappe,
+            mappe: req.body.mappe
         };
+
+        if (req.body.coordinate) {
+            datiDaAggiornare.coordinate = req.body.coordinate;
+        }
         
         if (isOperatore) {
             if (req.body.proprietario) {
