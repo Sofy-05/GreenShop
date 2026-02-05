@@ -19,7 +19,7 @@ router.get('/:user_id', tokenChecker, async (req, res) => { //testata, funziona
             });
         }
 
-        const userTrovato = await User.findById(idDaUrl).select('preferitiNegozi').populate('preferitiNegozi', 'nome'); // .find() usa ciò che gli viene passato per consultare il database
+        const userTrovato = await User.findById(idDaUrl).select('preferitiNegozi').populate('preferitiNegozi'); // .find() usa ciò che gli viene passato per consultare il database
 
         if (!userTrovato) {
             return res.status(404).json({
@@ -28,6 +28,8 @@ router.get('/:user_id', tokenChecker, async (req, res) => { //testata, funziona
                 dettagli: "L'id specificato non corrisponde ad alcun utente"
             });
         }
+
+        const listaPulita = userTrovato.preferitiNegozi.filter(negozio => negozio !== null);
 
         res.status(200).json(userTrovato.preferitiNegozi); // restituisco un messaggio di conferma e la lista degli user trovati (deve essere uno user perché cercato per id)
     }
