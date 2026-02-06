@@ -13,7 +13,7 @@ router.get('', async (req,res) => {
         if(filtroCategoria)
             filtro.Categorie = filtroCategoria
         
-        const venditoriTrovati = await Ecommerce.find(filtro);
+        const venditoriTrovati = await Ecommerce.find(filtro).populate('User');
 
         res.status(200).json(venditoriTrovati);
     }
