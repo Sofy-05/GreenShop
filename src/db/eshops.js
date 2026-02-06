@@ -13,7 +13,7 @@ router.get('', async (req,res) => {
         if(filtroCategoria)
             filtro.Categorie = filtroCategoria
         
-        const venditoriTrovati = await Ecommerce.find(filtro).populate('User');
+        const venditoriTrovati = await Ecommerce.find(filtro).populate('User','username');
 
         res.status(200).json(venditoriTrovati);
     }
@@ -30,7 +30,7 @@ router.get('', async (req,res) => {
 router.get('/:eshop_id', async (req,res) => {
     try{
         const eshopId = req.params.eshop_id
-        const eshop = await Ecommerce.findById(eshopId).populate('User'); //deve popolare user per quando facciamo le richieste del nome dello user
+        const eshop = await Ecommerce.findById(eshopId).populate('User','username'); //deve popolare user per quando facciamo le richieste del nome dello user
 
         res.status(200).json(eshop);
     }
