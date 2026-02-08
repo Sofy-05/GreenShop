@@ -12,8 +12,8 @@ const tokenChecker = function(req, res, next) {
     if (!token) {
         return res.status(401).send({ 
             success: false,
-            titolo: "Utente non autenticato",
-            dettagli: "Token mancante."
+            titolo: "Unauthorized",
+            dettagli: "Token mancante. Utente non autenticato."
         });
     }
 
@@ -25,8 +25,8 @@ const tokenChecker = function(req, res, next) {
         if (err) {
             return res.status(403).send({
                 success: false,
-                titolo: "Permessi negati",
-                dettagli: "Il token non è valido o è scaduto."
+                titolo: "Forbidden",
+                dettagli: "Permessi negati. Il token non è valido o è scaduto."
             });     
         } else {
             req.loggedUser = decoded;

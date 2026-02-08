@@ -13,23 +13,30 @@ router.get('', async (req, res) => { //testata, funziona
         const filtro = {}
         const filtroNome = req.query.nome //filtro per nome (req.query si usa per i query parameters)
         const filtroCategoria = req.query.categoria //filtro per categoria
-        const filtroVerificato = req.query.verificatoDaOperatore //filtro per mappa o sezione segnalazioni
+        const filtroVerificato = req.query.verificatoDaOperatore //filtro per mappa e notifiche operatore
+        const filtroProprietario = req.query.proprietarioInAttesa //filtro per notifiche operatore
         if(filtroNome)
             filtro.nome = new RegExp(filtroNome, 'i');
         if(filtroCategoria)
-            filtro.categoria = filtroCategoria
+            filtro.categoria = filtroCategoria;
+        /**
+        logica vecchia delle rivendicazioni
         if (filtroVerificato) {
             if (filtroVerificato === 'false') {
-                // Se l'operatore cerca le "Notifiche" (cose da verificare),
-                // gli diamo sia i negozi nuovi (false) SIA quelli con richieste in attesa.
                 filtro.$or = [
                     { verificatoDaOperatore: false },
-                    { proprietarioInAttesa: { $ne: null } } // $ne significa "Not Equal" (diverso da null)
+                    { proprietarioInAttesa: { $ne: null } }
                 ];
             } else {
-                // Se cerca quelli verificati (true), comportamento standard
                 filtro.verificatoDaOperatore = filtroVerificato;
             }
+        }**/
+
+        //sezione notifiche operatore: verificatoDaOperatore=false || proprietarioInAttesa=true
+        if (filtroVerificato) 
+            filtro.verificatoDaOperatore = filtroVerificato === 'true';
+        if (filtroProprietario === 'true') {
+            filtro.proprietarioInAttesa = { $ne: null }; //i negozi dove proprietarioInAttesa!=null
         }
         
         const negoziTrovati = await Negozio.find(filtro);
@@ -69,10 +76,13 @@ router.get('/:negozio_id', tokenCheckerOptional, async(req, res) => { //testata,
         if (!isOperatore && !isVenditore) {
             delete negozio.licenzaOppureFoto;
             delete negozio.verificatoDaOperatore;
+            delete negozio.proprietario;
+            delete negozio.proprietarioInAttesa;
         }
-        if(!isOperatore && isVenditore)
-            delete negozio.verificatoDaOperatore
-
+        if(!isOperatore && isVenditore){
+            delete negozio.verificatoDaOperatore;
+            delete negozio.proprietarioInAttesa;
+        }
         res.status(200).json(negozio);
         //Il frontend userà req.loggedUser (o il token) per decidere se mostrare il pulsante "Aggiungi ai preferiti"
     }
@@ -92,7 +102,6 @@ router.post('', tokenChecker, async (req,res) => { //testata, funziona
         
         let categorieInput = req.body.categoria || req.body.categories;
         
-        // Se è una stringa singola (es. "alimenti"), la trasformiamo in array
         if (typeof categorieInput === 'string') {
             categorieInput = [categorieInput];
         }
@@ -128,7 +137,7 @@ router.post('', tokenChecker, async (req,res) => { //testata, funziona
                 success: true
             });
     }
-    catch(err){ //gestione errori definiti nelle API
+    catch(err){ 
         console.error("Errore nella creazione del negozio: ", err);
         if(err.name == "Bad Request"){
             res.status(400).json({ 
@@ -195,13 +204,15 @@ router.put('/:negozio_id', tokenChecker, async (req, res) => {
         const negozioEsistente = await Negozio.findById(negozioId);
 
         if (!negozioEsistente) {
-            return res.status(404).json({ success: false, dettagli: "Negozio non trovato" });
+            return res.status(404).json({ 
+                success: false, 
+                titolo: "Not Found",
+                dettagli: "Negozio non trovato" });
         }
 
         const isOperatore = req.loggedUser.ruolo === 'operatore';
         const isProprietario = negozioEsistente.proprietario && 
                                negozioEsistente.proprietario.toString() === req.loggedUser.id;
-
         const isRivendicazione = !negozioEsistente.proprietario && 
                                  req.body.proprietario === req.loggedUser.id;
 
@@ -242,7 +253,6 @@ router.put('/:negozio_id', tokenChecker, async (req, res) => {
             } 
             else if (req.body.proprietarioInAttesa === null) {
                 datiDaAggiornare.proprietarioInAttesa = null;
-                // Non tocchiamo nient'altro, il negozio resta vivo
             }
             
             else {

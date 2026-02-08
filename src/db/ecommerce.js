@@ -13,7 +13,7 @@ router.get('', async (req,res) => {
         if(filtroCategoria)
             filtro.Categorie = filtroCategoria
         
-        const venditoriTrovati = await Ecommerce.find(filtro).populate('User','username');
+        const venditoriTrovati = await Ecommerce.find(filtro).populate('User','username profile_picture');
 
         res.status(200).json(venditoriTrovati);
     }
@@ -27,15 +27,15 @@ router.get('', async (req,res) => {
     }
 });
 
-router.get('/:eshop_id', async (req,res) => {
+router.get('/:ecommerce_id', async (req,res) => {
     try{
-        const eshopId = req.params.eshop_id
-        const eshop = await Ecommerce.findById(eshopId).populate('User','username'); //deve popolare user per quando facciamo le richieste del nome dello user
+        const ecommerceId = req.params.ecommerce_id
+        const ecommerce = await Ecommerce.findById(ecommerceId).populate('User','username profile_picture'); //deve popolare user per quando facciamo le richieste del nome dello user
 
-        res.status(200).json(eshop);
+        res.status(200).json(ecommerce);
     }
     catch(err){
-        console.error("Errore nella visualizzazione del venditore: ", err);
+        console.error("Errore nella visualizzazione dei dettagli del venditore: ", err);
         res.status(500).json({
             success: false,
             titolo: "Internal Server Error",

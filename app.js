@@ -5,7 +5,7 @@ import registerRouter from './src/db/register.js';
 import negoziRouter from './src/db/negozi.js';
 import preferitiRouter from './src/db/preferiti.js';
 import feedbackRouter from './src/db/feedback.js';
-import eshopsRouter from './src/db/eshops.js';
+import ecommerceRouter from './src/db/ecommerce.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
@@ -16,29 +16,23 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-// Permettono di leggere il body delle richieste
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//CORS: Permette al frontend(port 3001) di parlare con il backend
 app.use(cors());
 
-// Serve i file statici dalla cartella 'public'
 app.use(express.static('public'));
 
-// Collegamento route: tutte le richieste che iniziano con /api vanno al tuo router
 app.use('/api/auth', authRouter);
 app.use('/api/auth', registerRouter);
 app.use('/api/negozi', negoziRouter);
 app.use('/api/preferiti/users', preferitiRouter);
 app.use('/api/feedback', feedbackRouter);
-app.use('/api/eshops', eshopsRouter);
+app.use('/api/ecommerce', ecommerceRouter);
 
-// SE NO USIAMO LE 2 CONST SOTTOSTANTI ELIMINIAMOLE, VEDIAMO MA PER ORA NON SERVONO
-const __filename = fileURLToPath(import.meta.url); // percorso completo del file corrente
-const __dirname = path.dirname(__filename); // percorso della cartella del file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Connessione DB
 //mongoose.connect(process.env.DB_URI || 'mongodb://127.0.0.1:27017/ShopGreen')
 mongoose.connect(process.env.DB_URI || 'mongodb+srv://anna_luvisotto:Anna2005.@anna.pcl2dby.mongodb.net/?appName=Anna')
     .then(() => {

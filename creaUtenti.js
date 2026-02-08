@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
-import User from './src/db/models/User.js'; // Controlla che il percorso sia giusto!
+import User from './src/db/models/User.js';
 import Ecommerce from './src/db/models/Ecommerce.js';
 
-// 1. Connessione al DB
 //mongoose.connect('mongodb://127.0.0.1:27017/ShopGreen') 
 mongoose.connect('mongodb+srv://anna_luvisotto:Anna2005.@anna.pcl2dby.mongodb.net/?appName=Anna') 
     .then(() => console.log("Connesso a MongoDB"))
@@ -10,9 +9,6 @@ mongoose.connect('mongodb+srv://anna_luvisotto:Anna2005.@anna.pcl2dby.mongodb.ne
 
 const creaDati = async () => {
     try {
-        // 2. Definisco gli utenti di test
-        // Nota: metto la password in chiaro perché nel tuo codice di login 
-        // la confronti direttamente (user.password != req.body.password)
         await User.deleteMany({});
         const utentiTest = [
             {
@@ -29,17 +25,14 @@ const creaDati = async () => {
             }
         ];
 
-        // 3. Inserisco nel DB
         await User.insertMany(utentiTest);
         console.log("Utenti Anna e Sofia creati con successo!");
 
-        //4. Recupero Sofia perchè mi serve per il profilo e-commerce
         const userSofia = await User.findOne({ username: "sofia" });
         if (!userSofia) {
             throw new Error("Errore: Sofia non è stata salvata correttamente!");
         }
-        
-        //5. Creo il profilo e-commerce per Sofia
+
         const shopSofia = new Ecommerce({
             User: userSofia._id,
             Categorie: ["vestiario"], 
@@ -54,7 +47,6 @@ const creaDati = async () => {
     } catch (error) {
         console.error("Errore durante la creazione:", error.message);
     } finally {
-        // 4. Chiudi la connessione
         mongoose.connection.close();
     }
 };

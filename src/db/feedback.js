@@ -6,7 +6,6 @@ import tokenChecker from './tokenChecker.js';
 
 const router = express.Router();
 
-// spero che nel tocken checker vengano gestiti anche i casi di errore 401 e 403 :)
 router.use(tokenChecker);
 
 router.get('', async (req, res) => { //testata, funziona
@@ -42,7 +41,7 @@ router.get('', async (req, res) => { //testata, funziona
         res.status(200).json({
             successo: true, 
             feedback: feedbackTrovato
-        }); // restituisco un messaggio di conferma
+        });
     }
     catch (err){
         console.error("Errore: ", err);
@@ -118,7 +117,7 @@ router.post('', async (req, res) => { //testata, funziona
         res.location("/api/feedback/" + feedbackId).status(201).json({success: true, positive: feedbackPositivi, negative: feedbackNegativi});
     }
     catch(err)
-    { //gestione errori definiti nelle API
+    {
         console.error("Errore nell'invio del feedback: ", err);
         res.status(500).json({success: false, titolo: "Internal Server Error", dettagli: "Il server fallisce nello stabilire una connessione con il database"})
     } 

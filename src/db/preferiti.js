@@ -3,7 +3,6 @@ import User from './models/User.js';
 import tokenChecker from './tokenChecker.js';
 const router = express.Router();
 
-// spero che nel tocken checker vengano gestiti anche i casi di errore 401 e 403 :)
 router.use(tokenChecker);
 
 router.get('/:user_id', tokenChecker, async (req, res) => { //testata, funziona
@@ -31,7 +30,7 @@ router.get('/:user_id', tokenChecker, async (req, res) => { //testata, funziona
 
         const listaPulita = userTrovato.preferitiNegozi.filter(negozio => negozio !== null);
 
-        res.status(200).json(userTrovato.preferitiNegozi); // restituisco un messaggio di conferma e la lista degli user trovati (deve essere uno user perché cercato per id)
+        res.status(200).json(userTrovato.preferitiNegozi); //restituisco un messaggio di conferma e la lista degli user trovati (deve essere uno user perché cercato per id)
     }
     catch (err)
     {
@@ -58,8 +57,8 @@ router.post('/:user_id', tokenChecker, async (req, res) => { //testata, funziona
 
         const utenteAggiornato = await User.findByIdAndUpdate(
             idDaUrl,
-            { $addToSet: { preferitiNegozi: idNegozio } }, // $addToSet aggiunge solo se l'ID non esiste già (evita duplicati)
-            { new: true } // Restituisce il documento aggiornato invece di quello vecchio
+            { $addToSet: { preferitiNegozi: idNegozio } }, //$addToSet aggiunge solo se l'ID non esiste già (evita duplicati)
+            { new: true } //Restituisce il documento aggiornato invece di quello vecchio
         );
 
         if (!utenteAggiornato) {
@@ -106,8 +105,8 @@ router.delete('/:user_id', tokenChecker, async (req, res) => {  //testata, funzi
 
         const utenteAggiornato = await User.findByIdAndUpdate(
             idDaUrl,
-            { $pull: { preferitiNegozi: idNegozio } }, // $addToSet aggiunge solo se l'ID non esiste già (evita duplicati)
-            { new: true } // Restituisce il documento aggiornato invece di quello vecchio
+            { $pull: { preferitiNegozi: idNegozio } }, //$addToSet aggiunge solo se l'ID non esiste già (evita duplicati)
+            { new: true } //Restituisce il documento aggiornato invece di quello vecchio
         );
 
         if (!utenteAggiornato) {
@@ -124,7 +123,10 @@ router.delete('/:user_id', tokenChecker, async (req, res) => {  //testata, funzi
     catch(err)
     { //gestione errori definiti nelle API
         console.error("Errore nella rimozione del negozio: ", err);
-        res.status(500).json({success: false, titolo: "Internal Server Error", dettagli: "Il server fallisce nello stabilire una connessione con il database"})
+        res.status(500).json({
+            success: false, 
+            titolo: "Internal Server Error", 
+            dettagli: "Il server fallisce nello stabilire una connessione con il database"})
     } 
 });
 
