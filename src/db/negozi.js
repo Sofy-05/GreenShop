@@ -8,37 +8,34 @@ const router = express.Router();
 //req.query per query params
 //req.params.nomedelparam per path params
 
-router.get('', async (req, res) => { //testata, funziona
+router.get('', tokenCheckerOptional, async (req, res) => { //testata, funziona
     try{
         const filtro = {}
         const filtroNome = req.query.nome //filtro per nome (req.query si usa per i query parameters)
         const filtroCategoria = req.query.categoria //filtro per categoria
-        const filtroVerificato = req.query.verificatoDaOperatore //filtro per mappa e notifiche operatore
-        const filtroProprietario = req.query.proprietarioInAttesa //filtro per notifiche operatore
+        const isOperatore = req.loggedUser && req.loggedUser.ruolo === 'operatore';
+
+        if (isOperatore) {
+             const filtroVerificato = req.query.verificatoDaOperatore;
+             const filtroProprietario = req.query.proprietarioInAttesa;
+
+             if (filtroVerificato) 
+                 filtro.verificatoDaOperatore = filtroVerificato === 'true';
+             
+             if (filtroProprietario === 'true') {
+                 filtro.proprietarioInAttesa = { $ne: null };
+             }
+        } 
+        else {
+            filtro.verificatoDaOperatore = true;
+        }
+
         if(filtroNome)
             filtro.nome = new RegExp(filtroNome, 'i');
+        
         if(filtroCategoria)
             filtro.categoria = filtroCategoria;
-        /**
-        logica vecchia delle rivendicazioni
-        if (filtroVerificato) {
-            if (filtroVerificato === 'false') {
-                filtro.$or = [
-                    { verificatoDaOperatore: false },
-                    { proprietarioInAttesa: { $ne: null } }
-                ];
-            } else {
-                filtro.verificatoDaOperatore = filtroVerificato;
-            }
-        }**/
 
-        //sezione notifiche operatore: verificatoDaOperatore=false || proprietarioInAttesa=true
-        if (filtroVerificato) 
-            filtro.verificatoDaOperatore = filtroVerificato === 'true';
-        if (filtroProprietario === 'true') {
-            filtro.proprietarioInAttesa = { $ne: null }; //i negozi dove proprietarioInAttesa!=null
-        }
-        
         const negoziTrovati = await Negozio.find(filtro);
 
         res.status(200).json(negoziTrovati);
@@ -94,7 +91,6 @@ router.get('/:negozio_id', tokenCheckerOptional, async(req, res) => { //testata,
             dettagli: "Il server fallisce nello stabilire una connessione con il database"
         })
     }
-
 });
 
 router.post('', tokenChecker, async (req,res) => { //testata, funziona
@@ -175,7 +171,7 @@ router.delete('/:negozio_id', tokenChecker, async(req, res) => { //testata, funz
         if(!isOperatore && !isVenditore){ //Ha una funzione diversa rispetto al 403 del tokenChecker
             return res.status(403).json({
                     success: false, 
-                    titolo: "Unauthorized",
+                    titolo: "Forbidden",
                     dettagli: "Questo account non ha i permessi per procedere con l'operazione"
             });
         }
@@ -219,6 +215,7 @@ router.put('/:negozio_id', tokenChecker, async (req, res) => {
         if (!isOperatore && !isProprietario && !isRivendicazione) {
             return res.status(403).json({
                 success: false,
+                titolo: "Forbidden",
                 dettagli: "Non hai i permessi per modificare questa attività"
             });
         }
@@ -243,13 +240,6 @@ router.put('/:negozio_id', tokenChecker, async (req, res) => {
                 datiDaAggiornare.proprietario = req.body.proprietario; 
                 datiDaAggiornare.proprietarioInAttesa = null;
                 datiDaAggiornare.verificatoDaOperatore = true; 
-                
-                const user = await User.findById(req.body.proprietario);
-                if (user && user.ruolo === 'utente') {
-                    user.ruolo = 'venditore';
-                    await user.save();
-                    console.log(`Utente ${user.username} promosso a venditore.`);
-                }
             } 
             else if (req.body.proprietarioInAttesa === null) {
                 datiDaAggiornare.proprietarioInAttesa = null;

@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.use(tokenChecker);
 
-router.get('', async (req, res) => { //testata, funziona
+router.get('', tokenChecker, async (req, res) => { //testata, funziona
     try{
         const userId = req.loggedUser.id;
         const negozioId = req.query.negozio_id;
@@ -53,7 +53,7 @@ router.get('', async (req, res) => { //testata, funziona
     }
 });
 
-router.post('', async (req, res) => { //testata, funziona 
+router.post('', tokenChecker, async (req, res) => { //testata, funziona 
     try{ //gestione del successo
         const userId = req.loggedUser.id;
         const negozioId = req.body.negozio;
