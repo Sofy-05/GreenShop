@@ -14,12 +14,19 @@ import { fileURLToPath } from 'url';
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors());
+const corsOptions = {
+    //su Render leggerà l'URL del frontend (es. https://greenshop-front.onrender.com)
+    //sul mio pc userà localhost (es. 5173 o quello che usa Vite)
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173', 
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.static('public'));
 
@@ -33,12 +40,14 @@ app.use('/api/ecommerce', ecommerceRouter);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//mongoose.connect(process.env.DB_URI || 'mongodb://127.0.0.1:27017/ShopGreen')
-mongoose.connect(process.env.DB_URI || 'mongodb+srv://anna_luvisotto:Anna2005.@anna.pcl2dby.mongodb.net/?appName=Anna')
+mongoose.connect(process.env.DB_URI)
     .then(() => {
         console.log('--- MongoDB Connesso ---');
         app.listen(PORT, () => {
             console.log(`Server attivo su http://localhost:${PORT}`);
         });
     })
-    .catch(err => console.error('Errore DB:', err));
+    .catch(err => {
+        console.error('Errore di connessione al DB:', err);
+        process.exit(1); 
+    });
