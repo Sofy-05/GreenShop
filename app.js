@@ -20,9 +20,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const corsOptions = {
-    //su Render leggerà l'URL del frontend (es. https://greenshop-front.onrender.com)
-    //sul mio pc userà localhost (es. 5173 o quello che usa Vite)
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173', 
+    origin: ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:4173'], 
     optionsSuccessStatus: 200
 };
 
