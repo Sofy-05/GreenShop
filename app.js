@@ -20,7 +20,12 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const corsOptions = {
-    origin: ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:4173'], 
+    origin: [
+        'http://localhost:5173',   
+        'http://localhost:3001',      
+        'http://localhost:4173',
+        'https://shopgreen-frontend.onrender.com' 
+    ], 
     optionsSuccessStatus: 200
 };
 
