@@ -43,14 +43,19 @@ app.use('/api/ecommerce', ecommerceRouter);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-mongoose.connect(process.env.DB_URI)
-    .then(() => {
-        console.log('--- MongoDB Connesso ---');
-        app.listen(PORT, () => {
-            console.log(`Server attivo su http://localhost:${PORT}`);
+if (process.env.NODE_ENV !== 'test') {
+    // Si connette e avvia il server SOLO se NON stiamo testando
+    mongoose.connect(process.env.DB_URI)
+        .then(() => {
+            console.log('--- MongoDB Connesso ---');
+            app.listen(PORT, () => {
+                console.log(`Server attivo su http://localhost:${PORT}`);
+            });
+        })
+        .catch(err => {
+            console.error('Errore di connessione al DB:', err);
+            process.exit(1); 
         });
-    })
-    .catch(err => {
-        console.error('Errore di connessione al DB:', err);
-        process.exit(1); 
-    });
+}
+
+export default app;

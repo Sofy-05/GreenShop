@@ -135,20 +135,18 @@ router.post('', tokenChecker, async (req,res) => { //testata, funziona
     }
     catch(err){ 
         console.error("Errore nella creazione del negozio: ", err);
-        if(err.name == "Bad Request"){
+        if(err.name == "ValidationError"){
             res.status(400).json({ 
                 success: false, 
                 titolo: "Bad Request", 
                 dettagli: "Uno o più campi obbligatori mancanti"
             });
         }
-        else if(err.name == "Internal Server Error"){
-            res.status(500).json({ 
-                success: false, 
-                titolo: "Internal Server Error", 
-                dettagli: "Il server fallisce nello stabilire una connessione con il database"
-            });
-        }
+        return res.status(500).json({ 
+            success: false, 
+            titolo: "Internal Server Error", 
+            dettagli: "Il server fallisce nello stabilire una connessione con il database"
+        });
     }
 });
 
