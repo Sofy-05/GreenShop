@@ -1,0 +1,2396 @@
+openapi: 3.0.1
+info:
+  title: Default module
+  description: ''
+  version: 1.0.0
+tags: []
+paths:
+  /auth/login:
+    post:
+      summary: /auth/login
+      deprecated: false
+      description: >-
+        Autentica un utente o operatore usando username e password e restituisce
+        JWT token
+      tags: []
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: username dell'utente
+                password:
+                  type: string
+                  description: password dell'utente
+              required:
+                - username
+                - password
+            example:
+              username: anna
+              password: anna
+        required: true
+      responses:
+        '200':
+          description: Autenticazione riuscita
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: True se autenticazione è riuscita
+                  titolo:
+                    type: string
+                  dettagli:
+                    type: string
+                  username:
+                    type: string
+                  id:
+                    type: string
+                  token:
+                    type: string
+                    description: JWT token
+                  ruolo:
+                    type: string
+                    enum:
+                      - utente
+                      - operatore
+                      - venditore
+                    description: >-
+                      Ruolo per il reindirizzamento (utente,venditore o
+                      operatore)
+                  self:
+                    type: string
+                required:
+                  - success
+                  - token
+                  - ruolo
+                  - titolo
+                  - dettagli
+                  - username
+                  - id
+                  - self
+          headers: {}
+        '400':
+          description: Username e/o password mancanti.
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '401':
+          description: Autenticazione fallita. Utente non trovato.
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+      security: []
+  /negozi:
+    get:
+      summary: /negozi
+      deprecated: false
+      description: >-
+        Ricerca e visualizzazione di tutti i segnaposti relativi alle attività
+        commerciali oppure delle segnalazioni di nuove attività / rivendicazioni
+      tags: []
+      parameters:
+        - name: nome
+          in: query
+          description: nome del negozio da cercare
+          required: false
+          example: Naturasì
+          schema:
+            type: string
+        - name: categoria
+          in: query
+          description: categoria dei negozi da visualizzare
+          required: false
+          example: alimenti
+          schema:
+            type: string
+        - name: verificatoDaOperatore
+          in: query
+          description: se l'attività è stata verificata da un operatore
+          required: false
+          example: 'true'
+          schema:
+            type: boolean
+            default: false
+        - name: proprietarioInAttesa
+          in: query
+          description: >-
+            id del proprietario che ha rivendicato la sua attività (già
+            esistente o meno)
+          required: false
+          example: 4547834hbhfsjh65464nbjkd
+          schema:
+            type: string
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            La ricerca ha successo, restituisce un array con i negozi
+            corrispondenti alla ricerca oppure le segnalazioni
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    nome:
+                      type: string
+                    categoria:
+                      type: array
+                      items:
+                        type: string
+                    coordinate:
+                      type: array
+                      items:
+                        type: number
+                    verificatoDaOperatore:
+                      type: boolean
+                    maps:
+                      type: string
+                      nullable: true
+                    mappe:
+                      type: string
+                      nullable: true
+                    linkSito:
+                      type: string
+                      nullable: true
+                    licenzaOppureFoto:
+                      type: string
+                    orari:
+                      $ref: '#/components/schemas/orari'
+                    sostenibilitàVerificata:
+                      type: boolean
+                    proprietario:
+                      type: string
+                    proprietarioInAttesa:
+                      type: string
+                  required:
+                    - _id
+                    - nome
+                    - categoria
+                    - coordinate
+                    - verificatoDaOperatore
+                    - licenzaOppureFoto
+                    - sostenibilitàVerificata
+                    - proprietario
+                    - proprietarioInAttesa
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+      security:
+        - Autenticazione: []
+    post:
+      summary: /negozi
+      deprecated: false
+      description: Creazione istanza nuova attività da verificare per l'operatore
+      tags: []
+      parameters:
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NTk3NzcyLCJleHAiOjE3NjY2ODQxNzJ9.MA-wanX5gpqYO-5To20DApgUopelEZweFCan5sIpLLU
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                coordinate:
+                  type: array
+                  items:
+                    type: number
+                  nullable: true
+                categoria:
+                  type: array
+                  items:
+                    type: string
+                sostenibilitàVerificata:
+                  type: boolean
+                  default: false
+                maps:
+                  type: string
+                  nullable: true
+                mappe:
+                  type: string
+                  nullable: true
+                linkSito:
+                  type: string
+                  nullable: true
+                orari:
+                  $ref: '#/components/schemas/orari'
+                  nullable: true
+                licenzaOppureFoto:
+                  type: string
+                verificatoDaOperatore:
+                  type: boolean
+                  default: false
+                  readOnly: true
+                proprietario:
+                  type: string
+                  description: true se l'utente che sta segnalando è il proprietario
+              required:
+                - nome
+                - categoria
+                - sostenibilitàVerificata
+                - licenzaOppureFoto
+                - verificatoDaOperatore
+                - proprietario
+            example: ''
+        required: true
+      responses:
+        '201':
+          description: >-
+            L'invio è riuscito, i dati necessari sono stati inseriti ed il db è
+            stato raggiunto correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: true se invio riuscito, false altrimenti
+                required:
+                  - success
+              example:
+                success: false
+          headers: {}
+        '400':
+          description: >-
+            Richiesta che non rispetta i criteri necessari, mancano campi
+            necessari
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '401':
+          description: >-
+            Il token non è valido, è scaduto o non è possibile controllarne
+            l'autenticità
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Mancata autenticazione
+                dettagli: Per segnalare una nuova attività esegui l'accesso o registrati
+          headers: {}
+        '403':
+          description: Il token non fornisce i permessi richiesti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+      security:
+        - Autenticazione: []
+  /negozi/{negozio_id}:
+    get:
+      summary: /negozi/{negozio_id}
+      deprecated: false
+      description: >-
+        Visualizzazione delle informazioni relative ad un negozio/segnalazione
+        mediante il suo id
+      tags: []
+      parameters:
+        - name: negozio_id
+          in: path
+          description: ''
+          required: true
+          example: 694ace8252a0cde59e87d06e
+          schema:
+            type: string
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NTExNjYxLCJleHAiOjE3NjY1OTgwNjF9.9InxOaEn7dr9u6xxAd9k_1xDY0x6SuJvCHmJdOaDRk0
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            La richesta ha successo, restituisce le informazioni relative al
+            negozio/segnalazione selezionato/a
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  negozio_id:
+                    type: string
+                  nome:
+                    type: string
+                  categoria:
+                    type: array
+                    items:
+                      type: string
+                    nullable: true
+                  sostenibilitàVerificata:
+                    type: boolean
+                    default: false
+                  maps:
+                    type: string
+                    nullable: true
+                  mappe:
+                    type: string
+                    nullable: true
+                  linkSito:
+                    type: string
+                    nullable: true
+                  licenzaOppureFoto:
+                    type: string
+                  verificatoDaOperatore:
+                    type: string
+                  coordinate:
+                    type: array
+                    items:
+                      type: number
+                    minItems: 2
+                    maxItems: 2
+                  proprietario:
+                    type: string
+                  proprietarioInAttesa:
+                    type: string
+                  orari:
+                    $ref: '#/components/schemas/orari'
+                required:
+                  - negozio_id
+                  - nome
+                  - sostenibilitàVerificata
+                  - verificatoDaOperatore
+                  - licenzaOppureFoto
+                  - coordinate
+                  - proprietario
+                  - proprietarioInAttesa
+                  - orari
+          headers: {}
+        '404':
+          description: Negozio non trovato
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+      security:
+        - Autenticazione: []
+    delete:
+      summary: /negozi/{negozio_id}
+      deprecated: false
+      description: >-
+        Elimina un negozio (licenza non presente o non valida, segnalazioni,
+        ecc.), eseguibile solo da un operatore
+      tags: []
+      parameters:
+        - name: negozio_id
+          in: path
+          description: ''
+          required: true
+          example: 694c1ed06bbadd7c8d451993
+          schema:
+            type: string
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NTExNjYxLCJleHAiOjE3NjY1OTgwNjF9.9InxOaEn7dr9u6xxAd9k_1xDY0x6SuJvCHmJdOaDRk0
+          schema:
+            type: string
+      responses:
+        '200':
+          description: L'operazione ha successo e viene inviato un messaggio di conferma
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  Success:
+                    type: boolean
+                required:
+                  - Success
+              example:
+                Success: true
+          headers: {}
+        '204':
+          description: La richiesta ha successo
+          headers: {}
+        '401':
+          description: >-
+            Il token non è valido, è scaduto o non è possibile controllarne
+            l'autenticità
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Mancata autenticazione
+                dettagli: >-
+                  Questa operazione è ristretta ai soli operatori o proprietari
+                  del negozio, fai l'accesso per procedere
+          headers: {}
+        '403':
+          description: Il token non fornisce i permessi richiesti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Unauthorized
+                dettagli: >-
+                  Questo account non ha i permessi per procedere con
+                  l'operazione
+          headers: {}
+        '404':
+          description: Il negozio da eliminare non è stato trovato
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: true
+                titolo: Server non raggiungibile
+                dettagli: >-
+                  Al momento il server non è raggiungibile, per cui non è
+                  possibile completare l'operazione, per favore ritenta
+          headers: {}
+      security:
+        - Autenticazione: []
+    put:
+      summary: /negozi/{negozio_id}
+      deprecated: false
+      description: >-
+        Modifica i campi di una segnalazione di una nuova attività o di una
+        rivendicazione sovrascrivendo quelli preesistenti
+      tags: []
+      parameters:
+        - name: negozio_id
+          in: path
+          description: ''
+          required: true
+          example: 694c25228eed813a9305ae70
+          schema:
+            type: string
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NjAwOTcxLCJleHAiOjE3NjY2ODczNzF9.FmPZ03gmdRd5OsEW_N9H3ybSJvK_dfunqbrlQkQt_lk
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                coordinate:
+                  type: array
+                  items:
+                    type: number
+                categoria:
+                  type: array
+                  items:
+                    type: string
+                sostenibilitàVerificata:
+                  type: boolean
+                  default: false
+                maps:
+                  type: string
+                  nullable: true
+                mappe:
+                  type: string
+                  nullable: true
+                linkSito:
+                  type: string
+                  nullable: true
+                orari:
+                  $ref: '#/components/schemas/orari'
+                licenzaOppureFoto:
+                  type: string
+                verificatoDaOperatore:
+                  type: boolean
+                proprietario:
+                  type: string
+                  description: id del proprietario
+                  nullable: true
+                proprietarioInAttesa:
+                  type: string
+              required:
+                - nome
+                - coordinate
+                - categoria
+                - sostenibilitàVerificata
+                - orari
+                - licenzaOppureFoto
+                - verificatoDaOperatore
+                - proprietarioInAttesa
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: La modifica ha successo, restituisce il negozio così modificato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nome:
+                    type: string
+                  coordinate:
+                    type: array
+                    items:
+                      type: number
+                  categoria:
+                    type: array
+                    items:
+                      type: string
+                  sostenibilitàVerificata:
+                    type: boolean
+                    default: false
+                  maps:
+                    type: string
+                    nullable: true
+                  mappe:
+                    type: string
+                    nullable: true
+                  linkSito:
+                    type: string
+                    nullable: true
+                  orari:
+                    $ref: '#/components/schemas/orari'
+                  licenzaOppureFoto:
+                    type: string
+                  verificatoDaOperatore:
+                    type: boolean
+                    default: true
+                  proprietario:
+                    type: string
+                    description: id del proprietario
+                  proprietarioInAttesa:
+                    type: string
+                required:
+                  - nome
+                  - coordinate
+                  - categoria
+                  - sostenibilitàVerificata
+                  - orari
+                  - licenzaOppureFoto
+                  - verificatoDaOperatore
+                  - proprietarioInAttesa
+                  - proprietario
+          headers: {}
+        '400':
+          description: L'operatore ha inviato campi non validi o mancanti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '401':
+          description: >-
+            Il token non è valido, è scaduto o non è possibile controllarne
+            l'autenticità
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Mancata autenticazione
+                dettagli: >-
+                  Questa operazione è ristretta ai soli operatori, fai l'accesso
+                  per procedere
+          headers: {}
+        '403':
+          description: Il token non fornisce i permessi richiesti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '404':
+          description: Negozio non trovato
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: true
+                titolo: Server non raggiungibile
+                dettagli: >-
+                  Al momento il server non è raggiungibile, per cui non è
+                  possibile completare l'operazione, per favore ritenta
+          headers: {}
+      security:
+        - Autenticazione: []
+  /preferiti/users/{user_id}:
+    post:
+      summary: /preferiti/users/{user_id}
+      deprecated: false
+      description: >-
+        Modifica di un campo di user, in questo caso creato per aggiungere le
+        attività commerciali fisiche dalla lista dei preferiti
+      tags: []
+      parameters:
+        - name: user_id
+          in: path
+          description: ''
+          required: true
+          example: 6930c04ea950f4fbeaea9bd0
+          schema:
+            type: string
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NTEzODI2LCJleHAiOjE3NjY2MDAyMjZ9.TuGozWNE8KGV-LO_4qRFOKiQOaU9Ss5ynz0yCjykmLA
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                negozio_id:
+                  type: string
+              required:
+                - negozio_id
+            example:
+              negozio_id: 694ace8252a0cde59e87d06e
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: >-
+                      Conferma la risucita dell'operazione, il negozio potrebbe
+                      già essere presente nella lista
+                required:
+                  - success
+              example:
+                success: true
+          headers: {}
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: True se aggiunto per la prima volta
+                required:
+                  - success
+              example:
+                success: true
+          headers: {}
+        '401':
+          description: >-
+            Il token non è valido, è scaduto o non è possibile controllarne
+            l'autenticità
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Mancata autenticazione
+                dettagli: >-
+                  Per aggiungere un'attività ai preferiti esegui l'accesso o
+                  registrati
+          headers: {}
+        '403':
+          description: Il token non fornisce i permessi richiesti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '404':
+          description: Utente non trovato
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Server non disponibile
+                dettagli: >-
+                  Il negozio non può essere aggiunto ai preferiti poiché il
+                  server non è raggiungibile
+          headers: {}
+      security:
+        - Autenticazione: []
+    get:
+      summary: /preferiti/users/{user_id}
+      deprecated: false
+      description: >-
+        Nell'area dedicata l'utente può vedere la lista dei suoi negozi fisici
+        preferiti
+      tags: []
+      parameters:
+        - name: user_id
+          in: path
+          description: ''
+          required: true
+          example: 6930c04ea950f4fbeaea9bd0
+          schema:
+            type: string
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NTEzODI2LCJleHAiOjE3NjY2MDAyMjZ9.TuGozWNE8KGV-LO_4qRFOKiQOaU9Ss5ynz0yCjykmLA
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            La ricerca ha successo, restituisce un array con i negozi segnati
+            come preferiti dall'utente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    negozio_id:
+                      type: string
+                      description: L'id per collegarsi sulla mappa
+                    nome:
+                      type: string
+                      description: Il nome per la visualizzazione
+                    coordinate:
+                      type: string
+                    sostenibilitàVerificata:
+                      type: string
+                    orari:
+                      $ref: '#/components/schemas/orari'
+                  required:
+                    - negozio_id
+                    - nome
+                    - orari
+                    - coordinate
+                    - sostenibilitàVerificata
+          headers: {}
+        '401':
+          description: Token mancante. Utente non autenticato.
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Mancata autenticazione
+                dettagli: >-
+                  Per aggiungere un'attività ai preferiti esegui l'accesso o
+                  registrati
+          headers: {}
+        '403':
+          description: Il token non fornisce i permessi richiesti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '404':
+          description: Utente non trovato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Server non raggiungibile
+                dettagli: >-
+                  Al momento il server non è raggiungibile, per cui non è
+                  possibile completare l'operazione, per favore ritenta
+          headers: {}
+      security:
+        - Autenticazione: []
+    delete:
+      summary: /preferiti/users/{user_id}
+      deprecated: false
+      description: Serve a rimuovere un negozio fisico dalla lista dei preferiti
+      tags: []
+      parameters:
+        - name: user_id
+          in: path
+          description: ''
+          required: true
+          example: 6930c04ea950f4fbeaea9bd0
+          schema:
+            type: string
+        - name: negozio_id
+          in: query
+          description: ''
+          required: false
+          example: 694ad3c20b1b8c4c33a6ca49
+          schema:
+            type: string
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NTEzODI2LCJleHAiOjE3NjY2MDAyMjZ9.TuGozWNE8KGV-LO_4qRFOKiQOaU9Ss5ynz0yCjykmLA
+          schema:
+            type: string
+      responses:
+        '204':
+          description: >-
+            L'operazione è andata a buon fine ma non si vuole mandare alcun
+            messaggio
+          headers: {}
+        '400':
+          description: Manca l'id del negozio da rimuovere dai preferiti
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+        '401':
+          description: >-
+            Il token non è valido, è scaduto o non è possibile controllarne
+            l'autenticità
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '403':
+          description: Il token non fornisce i permessi richiesti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '404':
+          description: >-
+            Se il negozio che si vuole rimuovere dalla lista è già stato rimosso
+            ma per qualche motivo l'interfaccia non è stata aggiornata, va
+            segnalato che non è possibile rimuoverlo nuovamente poiché nel
+            database non è più associato all'utente
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Not found
+                dettagli: >-
+                  il negozio che si tenta di rimuovere dalla lista è già stato
+                  rimosso o non è presente nella lista
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Server non raggiungibile
+                dettagli: >-
+                  Al momento il server non è raggiungibile, per cui non è
+                  possibile completare l'operazione, per favore ritenta
+          headers: {}
+      security:
+        - Autenticazione: []
+  /feedback:
+    post:
+      summary: /feedback
+      deprecated: false
+      description: >-
+        permette ad un utente di inviare un feedback sulla sostenibilità di un
+        negozio verificato da un operatore ma col segnaposto ancora grigio
+      tags: []
+      parameters:
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NTk1ODE1LCJleHAiOjE3NjY2ODIyMTV9.YfZjKUM-UCWhSJnbH1IXe_5C5qECCEY7_uMbC4zW9wY
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                negozio:
+                  type: string
+                feedback:
+                  type: boolean
+              required:
+                - negozio
+                - feedback
+            example:
+              negozio: 694c249f8eed813a9305ae50
+              feedback: 'true'
+        required: true
+      responses:
+        '200':
+          description: >-
+            Il feedback è stato registrato e viene inviato un messaggio di
+            conferma
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: True se ha avuto successo
+                required:
+                  - success
+              example:
+                success: true
+          headers: {}
+        '201':
+          description: >-
+            Il feedback è stato registrato e viene inviato un messaggio di
+            conferma, inoltre viene restituito l'id del negozio col numero di
+            feedback raggiunti sia positivi che negativi
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: True se ha avuto successo
+                  positive:
+                    type: integer
+                    description: numero di feedback positivi, compreso quello registrato
+                    minimum: 0
+                    maximum: 8
+                  negative:
+                    type: integer
+                    description: numero di feedback negativi, compreso quello registrato
+                    minimum: 0
+                    maximum: 8
+                required:
+                  - success
+                  - positive
+                  - negative
+              example:
+                success: false
+                positive: 4
+                negative: 8
+          headers: {}
+        '401':
+          description: Utente non trovato
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '403':
+          description: Il token non fornisce i permessi richiesti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '409':
+          description: >-
+            L'utente ha già mandato un feedback per quel negozio, ma per errore
+            di sincronizzazione dell'interfaccia prova a mandarne un altro
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Feedback già inviato
+                dettagli: Non è possibile inviare più di un feedback per attività
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Server non raggiungibile
+                dettagli: >-
+                  Al momento il server non è raggiungibile, per cui non è
+                  possibile completare l'operazione, per favore ritenta
+          headers: {}
+      security:
+        - Autenticazione: []
+  /feedback/:
+    get:
+      summary: /feedback
+      deprecated: false
+      description: >-
+        Visualizzazione del feedback inviato da un utente ad un determinato
+        negozio
+      tags: []
+      parameters:
+        - name: negozio_id
+          in: query
+          description: ''
+          required: false
+          example: 694c249f8eed813a9305ae50
+          schema:
+            type: string
+        - name: autenticazione
+          in: header
+          description: ''
+          required: false
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFubmEiLCJpZCI6IjY5MzBjMDRlYTk1MGY0ZmJlYWVhOWJkMCIsInJ1b2xvIjoib3BlcmF0b3JlIiwiaWF0IjoxNzY2NTk1ODE1LCJleHAiOjE3NjY2ODIyMTV9.YfZjKUM-UCWhSJnbH1IXe_5C5qECCEY7_uMbC4zW9wY
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Il feedback esiste e viene recuperato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: True come conferma che l'operazione è riuscita
+                  feedback:
+                    type: boolean
+                    description: >-
+                      True se la votazione lasciata era positiva, false se era
+                      negativa
+                required:
+                  - feedback
+                  - success
+              example:
+                success: true
+                feedback: true
+          headers: {}
+        '400':
+          description: Manca l'id del negozio
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '401':
+          description: Utente non trovato
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '403':
+          description: Il token non fornisce i permessi richiesti
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+        '404':
+          description: Non è presente alcun feedback associato a questi user e negozio
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: >-
+                      True se la ricerca è stata completata ma il feedback non è
+                      stato trovato, false se non è stato possibile concludere
+                      la ricerca e dunque il feedback potrebbe esserci ma non
+                      essere stato trovato
+                required:
+                  - success
+              example:
+                success: true
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Server non raggiungibile
+                dettagli: >-
+                  Al momento il server non è raggiungibile, per cui non è
+                  possibile completare l'operazione, per favore ritenta
+          headers: {}
+      security:
+        - Autenticazione: []
+  /ecommerce:
+    get:
+      summary: /ecommerce
+      deprecated: false
+      description: >-
+        Restituisce la lista dei venditori disposti ad incontrarsi nella zona
+        selezionata
+      tags: []
+      parameters:
+        - name: zona
+          in: query
+          description: 'filtro per zona '
+          required: false
+          example: Gardolo
+          schema:
+            type: string
+        - name: categoria
+          in: query
+          description: filtro per categoria
+          required: false
+          example: vestiario
+          schema:
+            type: string
+      responses:
+        '200':
+          description: La ricerca ha successo, restituisce una lista di venditori
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                    user_id:
+                      type: string
+                    profile_picture:
+                      type: string
+                      nullable: true
+                    Zone:
+                      type: array
+                      items:
+                        type: string
+                        enum:
+                          - Meano
+                          - Gardolo
+                          - Argentario
+                          - Centro Storico Piedicastello
+                          - Bondone
+                          - San Giuseppe Santa Chiara
+                          - Sardagna
+                          - Povo
+                          - Oltrefersina
+                          - Ravina-Romagnano
+                          - Villazzano
+                          - Mattarello
+                    Links:
+                      type: array
+                      items:
+                        type: string
+                    Categorie:
+                      type: array
+                      items:
+                        type: string
+                    Info:
+                      type: string
+                  required:
+                    - username
+                    - Zone
+                    - Links
+                    - user_id
+                    - Categorie
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+      security: []
+  /ecommerce/{ecommerce_id}:
+    get:
+      summary: /ecommerce/{ecommerce_id}
+      deprecated: false
+      description: 'Visualizzazione dei dettagli di un venditore e-commerce '
+      tags: []
+      parameters:
+        - name: ecommerce_id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            La richiesta ha successo, restituisce le informazioni relative al
+            venditore selezionato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  user_id:
+                    type: string
+                  profile_picture:
+                    type: string
+                  Links:
+                    type: array
+                    items:
+                      type: string
+                  Categorie:
+                    type: array
+                    items:
+                      type: string
+                  Zone:
+                    type: array
+                    items:
+                      type: string
+                  Info:
+                    type: string
+                required:
+                  - username
+                  - Links
+                  - Categorie
+                  - Zone
+                  - user_id
+          headers: {}
+        '500':
+          description: Il server fallisce nel stabilire una connessione con il database
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+          headers: {}
+      security:
+        - Autenticazione: []
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: codice di stato
+        titolo:
+          type: string
+          description: titolo dell'errore
+        dettagli:
+          type: string
+          description: messaggio di errore
+      required:
+        - success
+        - titolo
+        - dettagli
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+        impostazioni:
+          type: object
+          properties:
+            lingua:
+              type: string
+            notificheMail:
+              type: boolean
+            tema:
+              type: string
+          required:
+            - lingua
+            - notificheMail
+            - tema
+        password:
+          type: string
+        preferitiECommerce:
+          type: array
+          items:
+            type: object
+            properties:
+              e-shops_id:
+                type: string
+            required:
+              - e-shops_id
+          nullable: true
+        preferitiNegozi:
+          type: array
+          items:
+            $ref: '#/components/schemas/Negozio'
+          nullable: true
+        profile_picture:
+          type: string
+        ruolo:
+          type: string
+        username:
+          type: string
+      required:
+        - _id
+        - email
+        - impostazioni
+        - password
+        - profile_picture
+        - ruolo
+        - username
+      $defs:
+        ObjectId:
+          type: object
+          properties:
+            $oid:
+              type: string
+              pattern: ^[0-9a-fA-F]{24}$
+          required:
+            - $oid
+          additionalProperties: false
+    Feedback:
+      type: object
+      properties:
+        autore:
+          $ref: '#/components/schemas/User'
+        negozio:
+          $ref: '#/components/schemas/Negozio'
+        feedback:
+          type: boolean
+      required:
+        - autore
+        - negozio
+        - feedback
+    LoginUtente:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    Negozio:
+      type: object
+      properties:
+        _id:
+          type: string
+        nome:
+          type: string
+        coordinate:
+          type: array
+          items:
+            type: number
+        categoria:
+          type: array
+          items:
+            type: string
+        sostenibilitàVerificata:
+          type: boolean
+          default: false
+        maps:
+          type: string
+        mappe:
+          type: string
+        linkSito:
+          type: string
+        orari:
+          type: object
+          properties:
+            lunedi:
+              type: object
+              properties:
+                chiuso:
+                  type: boolean
+                slot:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      apertura:
+                        type: string
+                      chiusura:
+                        type: string
+                    required:
+                      - apertura
+                      - chiusura
+              required:
+                - chiuso
+                - slot
+            martedi:
+              type: object
+              properties:
+                chiuso:
+                  type: boolean
+                slot:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      apertura:
+                        type: string
+                      chiusura:
+                        type: string
+                    required:
+                      - apertura
+                      - chiusura
+              required:
+                - chiuso
+                - slot
+            mercoledi:
+              type: object
+              properties:
+                chiuso:
+                  type: boolean
+                slot:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - chiuso
+                - slot
+            giovedi:
+              type: object
+              properties:
+                chiuso:
+                  type: boolean
+                slot:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      apertura:
+                        type: string
+                      chiusura:
+                        type: string
+              required:
+                - chiuso
+                - slot
+            venerdi:
+              type: object
+              properties:
+                chiuso:
+                  type: boolean
+                slot:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      apertura:
+                        type: string
+                      chiusura:
+                        type: string
+              required:
+                - chiuso
+                - slot
+            sabato:
+              type: object
+              properties:
+                chiuso:
+                  type: boolean
+                slot:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      apertura:
+                        type: string
+                      chiusura:
+                        type: string
+              required:
+                - chiuso
+                - slot
+            domenica:
+              type: object
+              properties:
+                chiuso:
+                  type: boolean
+                slot:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - chiuso
+                - slot
+          required:
+            - lunedi
+            - martedi
+            - mercoledi
+            - giovedi
+            - venerdi
+            - sabato
+            - domenica
+        licenzaOppureFoto:
+          type: string
+        verificatoDaOperatore:
+          type: boolean
+        proprietario:
+          $ref: '#/components/schemas/User'
+      required:
+        - _id
+        - nome
+        - coordinate
+        - categoria
+        - sostenibilitàVerificata
+        - maps
+        - mappe
+        - linkSito
+        - orari
+        - licenzaOppureFoto
+        - verificatoDaOperatore
+    orari:
+      type: object
+      properties:
+        lunedi:
+          type: object
+          properties:
+            chiuso:
+              type: boolean
+            slot:
+              type: array
+              items:
+                type: object
+                properties:
+                  apertura:
+                    type: string
+                  chiusura:
+                    type: string
+          required:
+            - chiuso
+            - slot
+        martedi:
+          type: object
+          properties:
+            chiuso:
+              type: boolean
+            slot:
+              type: array
+              items:
+                type: object
+                properties:
+                  apertura:
+                    type: string
+                  chiusura:
+                    type: string
+                required:
+                  - apertura
+                  - chiusura
+          required:
+            - chiuso
+            - slot
+        mercoledi:
+          type: object
+          properties:
+            chiuso:
+              type: boolean
+            slot:
+              type: array
+              items:
+                type: object
+                properties:
+                  apertura:
+                    type: string
+                  chiusura:
+                    type: string
+                required:
+                  - apertura
+                  - chiusura
+          required:
+            - chiuso
+            - slot
+        giovedi:
+          type: object
+          properties:
+            chiuso:
+              type: boolean
+            slot:
+              type: array
+              items:
+                type: object
+                properties:
+                  apertura:
+                    type: string
+                  chiusura:
+                    type: string
+                required:
+                  - apertura
+                  - chiusura
+          required:
+            - chiuso
+            - slot
+        venerdi:
+          type: object
+          properties:
+            chiuso:
+              type: boolean
+            slot:
+              type: array
+              items:
+                type: object
+                properties:
+                  apertura:
+                    type: string
+                  chiusura:
+                    type: string
+                required:
+                  - apertura
+                  - chiusura
+          required:
+            - chiuso
+            - slot
+        sabato:
+          type: object
+          properties:
+            chiuso:
+              type: boolean
+            slot:
+              type: array
+              items:
+                type: object
+                properties:
+                  apertura:
+                    type: string
+                  chiusura:
+                    type: string
+                required:
+                  - apertura
+                  - chiusura
+          required:
+            - chiuso
+            - slot
+        domenica:
+          type: object
+          properties:
+            chiuso:
+              type: boolean
+            slot:
+              type: array
+              items:
+                type: object
+                properties:
+                  apertura:
+                    type: string
+                  chiusura:
+                    type: string
+          required:
+            - chiuso
+            - slot
+      required:
+        - lunedi
+        - martedi
+        - mercoledi
+        - giovedi
+        - venerdi
+        - sabato
+        - domenica
+      nullable: true
+  responses: {}
+  securitySchemes:
+    Autenticazione:
+      type: http
+      scheme: bearer
+servers: []
+security: []
