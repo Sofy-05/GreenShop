@@ -618,6 +618,9 @@ paths:
               example:
                 Success: true
           headers: {}
+        '204':
+          description: La richiesta ha successo
+          headers: {}
         '401':
           description: >-
             Il token non è valido, è scaduto o non è possibile controllarne
@@ -1944,6 +1947,56 @@ paths:
                   - Zone
                   - user_id
           headers: {}
+        '400':
+          description: L'ID fornito non è valido.
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: false
+                titolo: Bad Request
+                dettagli: L'ID fornito non è valido
+        '404':
+          description: Non è presente nessun ecommerce con questo ID
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: codice di stato
+                  titolo:
+                    type: string
+                    description: titolo dell'errore
+                  dettagli:
+                    type: string
+                    description: messaggio di errore
+                required:
+                  - success
+                  - titolo
+                  - dettagli
+              example:
+                success: true
+                titolo: Not Found
+                dettagli: Venditore ecommerce non trovato
         '500':
           description: Il server fallisce nel stabilire una connessione con il database
           content:
