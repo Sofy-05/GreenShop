@@ -101,7 +101,7 @@ describe('GET `/feedback`', () => {
         });
     });
 
-    test('Se il token è scaduto, restituisce 403 e un messaggio di errore', async () => {
+    test('Se il token non fornisce i permessi richiesti, restituisce 403 e un messaggio di errore', async () => {
         const response = await request(app)
             .get(BASE_URL)
             .query({ negozio_id: IDNegozio })
