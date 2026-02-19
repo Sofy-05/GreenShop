@@ -10,14 +10,18 @@ const BASE_URL = '/api/negozi';
 const JWT_SECRET =  process.env.PRIVATE_KEY;
 
 const IDNegozio = '699443846b30cbd91bbcb4c8'; 
-const IDProprietario = '699447b46b30cbd91bbcb4d5'; 
-const IDUtente = '699388546b30cbd91bbcb4c3'; 
-const IDOperatore = '6994bc556b30cbd91bbcb4dd';
+const FakeIDNegozio = new mongoose.Types.ObjectId();
+const IDProprietario = '6996e93f63ade9c90df7bc58'; 
+const IDUtente = '6996e81863ade9c90df7bc56'; 
+const IDOperatore = '6996e81863ade9c90df7bc56';
 const IDNegozioNonVerificato = '6994b6806b30cbd91bbcb4da';
+const FakeIDUtente = new mongoose.Types.ObjectId();
 
 let tokenUtenteGenerico;
 let tokenProprietario;
 let tokenOperatore;
+let expiredToken;
+
 
 beforeAll(async () => {
     jest.setTimeout(10000);
@@ -26,23 +30,29 @@ beforeAll(async () => {
     // Token per utente (test) 
     tokenUtenteGenerico = jwt.sign({
         id: IDUtente,
-        email: 'email@test.com',
+        email: 'utente@test.com',
         ruolo: 'utente'
     }, JWT_SECRET, { expiresIn: 86400 });
 
     // Token per venditore proprietario (venditoreTest")
     tokenProprietario = jwt.sign({
         id: IDProprietario,
-        email: 'emailVenditore@test.com',
+        email: 'venditore@test.com',
         ruolo: 'venditore' 
     }, JWT_SECRET, { expiresIn: 86400 });
 
     // Token per operatore 
     tokenOperatore = jwt.sign({
         id: IDOperatore,
-        email: 'op@test.com',
+        email: 'operatore@test.com',
         ruolo: 'operatore'
     }, JWT_SECRET, { expiresIn: 86400 });
+
+    expiredToken = jwt.sign({
+        id: IDOperatore,
+        email: 'operatore@test.com',
+        ruolo: 'operatore'
+    }, JWT_SECRET, { expiresIn: 0 });
 });
 
 describe('GET `/negozi`', () => {
@@ -161,10 +171,9 @@ describe('GET `/negozi/{negozio_id}`', () => {
         expect(response.body.proprietarioInAttesa).toBe(false);
     });
 
-    test('Se il negozio non viene trovato, restituisce 400 e un messaggio di errore', async () => {
-        const fakeID = '000000000000000000000000'; 
+    test('Se il negozio non viene trovato, restituisce 400 e un messaggio di errore', async () => { 
         const response = await request(app)
-            .get(`${BASE_URL}/${fakeID}`)
+            .get(`${BASE_URL}/${FakeIDNegozio}`)
             .set('Authorization', 'Bearer ' + tokenUtenteGenerico);
         
         expect(response.status).toBe(404);
@@ -234,6 +243,34 @@ describe('POST `/negozi`', () => {
             success: false, 
             titolo: "Bad Request", 
             dettagli: "Uno o più campi obbligatori mancanti"
+        });
+    });
+
+    test('Se il token non è valido o è scaduto, restituisce 401 e un messaggio di errore', async () => {
+        const response = await request(app)
+            .post(BASE_URL)
+            .set('Authorization', 'Bearer ' + expiredToken)
+            .send(payloadValido);
+
+        expect(response.status).toBe(401);
+        expect(response.body).toEqual({
+            success: false,
+            titolo: "Unauthorized",
+            dettagli: "Token scaduto. Effettua nuovamente il login."
+        });
+    });
+
+    test('Se il token non fornisce i permessi richiesti, restituisce 403 e un messaggio di errore', async () => {
+        const response = await request(app)
+            .post(BASE_URL)
+            .set('Authorization', 'Bearer ' + FakeIDUtente)
+            .send(payloadValido);
+
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({
+            success: false,
+                titolo: "Forbidden",
+                dettagli: "Permessi negati. Il token non è valido."
         });
     });
 
@@ -308,6 +345,20 @@ describe('DELETE `/negozi/{negozio_id}`', () => {
         });
     });
 
+    test('Se il token non è valido o è scaduto, restituisce 401 e un messaggio di errore', async () => {
+
+        const response = await request(app)
+            .delete(`${BASE_URL}/${negozioDaEliminareId}`)
+            .set('Authorization', 'Bearer ' + expiredToken);
+
+        expect(response.status).toBe(401);
+        expect(response.body).toEqual({
+            success: false,
+            titolo: "Unauthorized",
+            dettagli: "Token scaduto. Effettua nuovamente il login."
+        });
+    });
+
     test('Se il server fallisce nel connettersi al DB, restituisce 500 e un messaggio di errore', async () => {
 
         const mockDelete = jest
@@ -344,11 +395,8 @@ describe('DELETE `/negozi/{negozio_id}`', () => {
     });
 
     test('Se il negozio non esiste, restituisce 404 e un messaggio di errore', async () => {
-
-        const fakeId = new mongoose.Types.ObjectId();
-
         const response = await request(app)
-            .delete(`${BASE_URL}/${fakeId}`)
+            .delete(`${BASE_URL}/${FakeIDNegozio}`)
             .set('Authorization', 'Bearer ' + tokenOperatore);
 
         expect(response.status).toBe(404);
@@ -360,6 +408,190 @@ describe('DELETE `/negozi/{negozio_id}`', () => {
     });
 });
 
+describe('PUT /negozi/{negozio_id}', () => {
+
+    let negozioId;
+
+    const payloadCreazione = {
+        nome: "NegozioDaModificare",
+        coordinate: [12.10, 55.20],
+        categoria: ["alimenti"],
+        sostenibilitàVerificata: false,
+        maps: "https://maps.google.com/test",
+        linkSito: "https://negozio-test.it",
+        licenzaOppureFoto: "licenza.jpg",
+        verificatoDaOperatore: false,
+        proprietarioInAttesa: "utente123",
+        orari: {
+            lunedi: { chiuso: true, slot: [] },
+            martedi: { chiuso: true, slot: [] },
+            mercoledi: { chiuso: true, slot: [] },
+            giovedi: { chiuso: true, slot: [] },
+            venerdi: { chiuso: true, slot: [] },
+            sabato: { chiuso: true, slot: [] },
+            domenica: { chiuso: true, slot: [] }
+        }
+    };
+
+    const payloadModificaOperatore = {
+        ...payloadCreazione,
+        nome: "NegozioModificato",
+        verificatoDaOperatore: true,
+        proprietario: IDProprietario
+    };
+
+    const payloadModificaProprietario = {
+        ...payloadCreazione,
+        nome: "NegozioMio",
+        categoria: ["vestiario"]
+    }
+
+    beforeAll(async () => {
+
+        await request(app)
+            .post(BASE_URL)
+            .set('Authorization', 'Bearer ' + tokenProprietario)
+            .send(payloadCreazione);
+
+        const negozio = await Negozio.findOne({
+            nome: "NegozioDaModificare"
+        });
+
+        negozioId = negozio._id.toString();
+    });
+
+    test('Se l’utente non ha i permessi, restituisce 403 e un messaggio di errore', async () => {
+
+        const response = await request(app)
+            .put(`${BASE_URL}/${negozioId}`)
+            .set('Authorization', 'Bearer ' + tokenUtenteGenerico)
+            .send(payloadModificaProprietario);
+
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({
+            success: false,
+            titolo: "Forbidden",
+            dettagli: "Non hai i permessi per modificare questa attività"
+        });
+    });
+
+    test('Se il token non è valido o è scaduto, restituisce 401 e un messaggio di errore', async () => {
+
+        const response = await request(app)
+            .put(`${BASE_URL}/${negozioId}`)
+            .set('Authorization', 'Bearer ' + expiredToken)
+            .send(payloadModificaProprietario);
+
+        expect(response.status).toBe(401);
+        expect(response.body).toEqual({
+            success: false,
+            titolo: "Unauthorized",
+            dettagli: "Token scaduto. Effettua nuovamente il login."
+        });
+    });
+
+    test('Se il server fallisce nel connettersi al DB, restituisce 500 e un messaggio di errore', async () => {
+
+        const mockUpdate = jest
+            .spyOn(Negozio, 'findByIdAndUpdate')
+            .mockRejectedValue(new Error('Errore DB'));
+
+        const response = await request(app)
+            .put(`${BASE_URL}/${negozioId}`)
+            .set('Authorization', 'Bearer ' + tokenOperatore)
+            .send(payloadModificaOperatore);
+
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({
+            success: false,
+                titolo: "Internal Server Error",
+                dettagli: "Errore del server durante l'aggiornamento"
+        });
+
+        mockUpdate.mockRestore();
+    });
+
+    test('Se l’operatore modifica il negozio, restituisce 200 e il negozio aggiornato', async () => {
+
+        const response = await request(app)
+            .put(`${BASE_URL}/${negozioId}`)
+            .set('Authorization', 'Bearer ' + tokenOperatore)
+            .send(payloadModificaOperatore);
+
+        expect(response.status).toBe(200);
+
+        expect(response.body.nome).toBe("NegozioModificato");
+        expect(response.body.verificatoDaOperatore).toBe(true);
+        expect(response.body.proprietario).toBe(
+            payloadModificaOperatore.proprietario
+        );
+
+        const negozioDB = await Negozio.findById(negozioId);
+
+        expect(negozioDB.nome).toBe("NegozioModificato");
+        expect(negozioDB.verificatoDaOperatore).toBe(true);
+    });
+
+    test('Se il proprietario modifica il negozio, restituisce 200 e il negozio aggiornato', async () => {
+
+        const response = await request(app)
+            .put(`${BASE_URL}/${negozioId}`)
+            .set('Authorization', 'Bearer ' + tokenProprietario)
+            .send(payloadModificaProprietario);
+
+        expect(response.status).toBe(200);
+
+        expect(response.body.nome).toBe("NegozioMio");
+        expect(response.body.categoria).toStrictEqual(["vestiario"]);
+
+        const negozioDB = await Negozio.findById(negozioId);
+
+        expect(negozioDB.nome).toBe("NegozioMio");
+        expect(negozioDB.categoria).toStrictEqual(["vestiario"]);
+    });
+
+    test('Se il negozio non esiste, restituisce 404 e un messaggio di errore', async () => {
+        const response = await request(app)
+            .put(`${BASE_URL}/${FakeIDNegozio}`)
+            .set('Authorization', 'Bearer ' + tokenOperatore)
+            .send(payloadModificaOperatore);
+
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({
+            success: false, 
+            titolo: "Not Found",
+            dettagli: "Negozio non trovato"
+        });
+    });
+
+    test('Se i campi sono mancanti o non validi, restituisce 400', async () => {
+
+        const payloadInvalido = {
+            nome: "",
+        };
+
+        const response = await request(app)
+            .put(`${BASE_URL}/${negozioId}`)
+            .set('Authorization', 'Bearer ' + tokenOperatore)
+            .send(payloadInvalido);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({
+            success: false,
+            titolo: "Bad Request",
+            dettagli: "Campi non validi o mancanti"
+        });
+    });
+
+
+
+    afterAll(async () => {
+        const response = await request(app)
+            .delete(`${BASE_URL}/${negozioId}`)
+            .set('Authorization', 'Bearer ' + tokenOperatore);
+    });
+
+});
 
 
 afterAll(async () => {

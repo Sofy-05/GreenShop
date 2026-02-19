@@ -23,15 +23,24 @@ const tokenChecker = function(req, res, next) {
 
     jwt.verify(token, process.env.PRIVATE_KEY, function(err, decoded) {        
         if (err) {
+
+            if (err.name === 'TokenExpiredError') {
+                return res.status(401).send({
+                    success: false,
+                    titolo: "Unauthorized",
+                    dettagli: "Token scaduto. Effettua nuovamente il login."
+                });
+            }
+
             return res.status(403).send({
                 success: false,
                 titolo: "Forbidden",
-                dettagli: "Permessi negati. Il token non è valido o è scaduto."
+                dettagli: "Permessi negati. Il token non è valido."
             });     
-        } else {
-            req.loggedUser = decoded;
-            next();
-        }
+        } 
+        
+        req.loggedUser = decoded;
+        next();
     });
     
 };

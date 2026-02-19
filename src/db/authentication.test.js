@@ -9,8 +9,8 @@ describe('POST `/auth/login`', () => {
         jest.setTimeout(10000);
         await mongoose.connect(process.env.DB_URI);
     });
-    const validUsername = 'test';
-    const validPassword = 'password';
+    const validUsername = 'utenteTest';
+    const validPassword = 'utente';
     const invalidUsername = "wrongUsername"
     const invalidPassword = "wrongPassword"
     const ruoli_aspettati =  ["operatore", "utente", "venditore"];

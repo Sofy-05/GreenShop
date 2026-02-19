@@ -618,9 +618,6 @@ paths:
               example:
                 Success: true
           headers: {}
-        '204':
-          description: La richiesta ha successo
-          headers: {}
         '401':
           description: >-
             Il token non è valido, è scaduto o non è possibile controllarne

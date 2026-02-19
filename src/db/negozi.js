@@ -19,12 +19,11 @@ router.get('', tokenCheckerOptional, async (req, res) => { //testata, funziona
              const filtroVerificato = req.query.verificatoDaOperatore;
              const filtroProprietario = req.query.proprietarioInAttesa;
 
-             if (filtroVerificato) 
-                 filtro.verificatoDaOperatore = filtroVerificato === 'true';
-             
-             if (filtroProprietario === 'true') {
-                 filtro.proprietarioInAttesa = { $ne: null };
-             }
+            if (filtroVerificato) 
+                filtro.verificatoDaOperatore = filtroVerificato === 'true';
+            
+            if (filtroProprietario === 'true')
+                filtro.proprietarioInAttesa = { $ne: null };
         } 
         else {
             filtro.verificatoDaOperatore = true;
