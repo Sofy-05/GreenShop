@@ -32,7 +32,7 @@ router.get('', tokenChecker, async (req, res) => { //testata, funziona
         
         if (!feedbackTrovato || feedbackTrovato.length === 0) {
             return res.status(404).json({
-                success: true,
+                success: false,
                 titolo: "Not Found",
                 dettagli: "Non è presente alcun feedback associato a questi user e negozio"
             });
@@ -66,7 +66,7 @@ router.post('', tokenChecker, async (req, res) => { //testata, funziona
         const feedbackTrovato = await Feedback.findOne(filtro)
         if (feedbackTrovato) {
             return res.status(409).json({
-                success: true,
+                success: false,
                 titolo: "Feedback già presente",
                 dettagli: "Non è possibile inviare un feedback poiché uno è già stato inviato"
             });

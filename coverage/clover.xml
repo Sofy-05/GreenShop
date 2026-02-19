@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1771508088141" clover="3.2.0">
-  <project timestamp="1771508088141" name="All files">
+<coverage generated="1771522669615" clover="3.2.0">
+  <project timestamp="1771522669615" name="All files">
     <metrics statements="1094" coveredstatements="901" conditionals="121" coveredconditionals="102" methods="4" coveredmethods="2" elements="1219" coveredelements="1005" complexity="0" loc="1094" ncloc="1094" packages="3" files="13" classes="13"/>
     <package name="GreenShop">
       <metrics statements="61" coveredstatements="48" conditionals="2" coveredconditionals="0" methods="0" coveredmethods="0"/>

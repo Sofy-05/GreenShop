@@ -81,7 +81,7 @@ describe('GET `/feedback`', () => {
 
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
-            success: true,
+            success: false,
             titolo: "Not Found",
             dettagli: "Non è presente alcun feedback associato a questi user e negozio"
         });
@@ -177,7 +177,7 @@ describe('POST `/feedback`', () => {
 
         expect(response.status).toBe(409);
         expect(response.body).toEqual({
-            success: true,
+            success: false,
                 titolo: "Feedback già presente",
                 dettagli: "Non è possibile inviare un feedback poiché uno è già stato inviato"
         });
